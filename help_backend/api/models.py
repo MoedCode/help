@@ -1,68 +1,50 @@
 from datetime import datetime
-
 import uuid
 from django.db import models
-from django.contrib.auth.models import User
-time = "%Y-%m-%dT%H:%M:%S.%f"
+from django.contrib.auth.models import AbstractUser
 
 class Base(models.Model):
-    # """The BaseModel class from which future classes will be derived"""
-    # if models.storage_t == "db":
-    #     id = Column(String(60), primary_key=True)
-    #     created_at = Column(DateTime, default=datetime.utcnow)
-    #     updated_at = Column(DateTime, default=datetime.utcnow)
+    """Base model with common fields."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    created_date = models.DateField(auto_now_add=True)  # New field for the date only
+    updated_date = models.DateField(auto_now=True)  # New field for the date only
 
-    def __init__(self, *args, **kwargs):
-        """Initialization of the base model"""
-        if kwargs:
-            for key, value in kwargs.items():
-                if key != "__class__":
-                    setattr(self, key, value)
-            if kwargs.get("created_at", None) and type(self.created_at) is str:
-                self.created_at = datetime.strptime(kwargs["created_at"], time)
-            else:
-                self.created_at = datetime.utcnow()
-            # Updated At
-            if kwargs.get("updated_at", None) and type(self.updated_at) is str:
-                self.updated_at = datetime.strptime(kwargs["updated_at"], time)
-            else:
-                self.updated_at = datetime.utcnow()
-            if kwargs.get("id", None) is None:
-                self.id = str(uuid.uuid4())
-        else:
-            self.id = str(uuid.uuid4())
-            self.created_at = datetime.utcnow()
-            self.updated_at = self.created_at
+    class Meta:
+        abstract = True  # This ensures Django does not create a separate table for Base
+
+class Users(AbstractUser, Base):
+    """Custom user model that inherits from AbstractUser and Base."""
+
+    # Email, first name, and last name fields, ensuring they're required
+    email = models.EmailField(unique=True, blank=False)
+    first_name = models.CharField(max_length=100, blank=False)
+    last_name = models.CharField(max_length=100, blank=False)
+
+    # Profile image field
+    profile_image = models.ImageField(upload_to='profile_images/', null=True, blank=True)
+# Linking user to a group
+    group = models.ForeignKey('Group', on_delete=models.SET_NULL, null=True, blank=True, related_name='members')
 
     def __str__(self):
-        """String representation of the BaseModel class"""
-        return "[{:s}] ({:s}) {}".format(self.__class__.__name__, self.id,
-                                         self.__dict__)
+        return self.username
 
-    # def save(self):
-    #     """updates the attribute 'updated_at' with the current datetime"""
-    #     self.updated_at = datetime.utcnow()
-    #     models.storage.new(self)
-    #     models.storage.save()
+class Group(models.Model):
+    """Group that users can belong to."""
+    name = models.CharField(max_length=255, unique=True)
+    description = models.TextField(null=True, blank=True)
+    created_date = models.DateTimeField(auto_now_add=True)
 
-    def to_dict(self, save_fs=None):
-        """returns a dictionary containing all keys/values of the instance"""
-        new_dict = self.__dict__.copy()
-        if "created_at" in new_dict:
-            new_dict["created_at"] = new_dict["created_at"].strftime(time)
-        if "updated_at" in new_dict:
-            new_dict["updated_at"] = new_dict["updated_at"].strftime(time)
-        new_dict["__class__"] = self.__class__.__name__
-        if "_sa_instance_state" in new_dict:
-            del new_dict["_sa_instance_state"]
-        if save_fs is None:
-            if "password" in new_dict:
-                del new_dict["password"]
-        return new_dict
+    def __str__(self):
+        return self.name
 
-class Users(Base, User):
-    pass
-# Create your models here.
-if __name__ == "__main__":
-    user0 = User()
-    print(user0.__dict__.keys())
+
+class HelpRequest(models.Model):
+    """Help request from a user, sent to other users in the same group."""
+    user = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='help_requests')
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='help_requests')
+    description = models.TextField()
+    request_date = models.DateTimeField(auto_now_add=True)
+    is_resolved = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Help Request from {self.user.username} in {self.group.name}"
