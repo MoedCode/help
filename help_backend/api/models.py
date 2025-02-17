@@ -50,9 +50,9 @@ class Users(AbstractUser, Base):
     date_of_birth = models.DateField(null=True, blank=True)
 
     # Address fields (separate from Location)
-    address_street = models.CharField(max_length=255, null=True, blank=True)
-    address_city = models.CharField(max_length=100, null=True, blank=True)
-    address_country = models.CharField(max_length=100, null=True, blank=True)
+    street = models.CharField(max_length=255, null=True, blank=True)
+    city = models.CharField(max_length=100, null=True, blank=True)
+    country = models.CharField(max_length=100, null=True, blank=True)
 
     # User's last known location
     location = models.OneToOneField(Location, on_delete=models.SET_NULL, null=True, blank=True, related_name="user")

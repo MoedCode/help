@@ -27,6 +27,8 @@ class getCSRFCookie(APIView):
 class Register(APIView):
     def post(self, request):
         clean_data = validate_user_data(request.data)
+        # user = Users.objects.create(**clean_data)
+        # test = user.__dict__
         with open("test.json", 'w') as jf:
             json.dump(clean_data , jf, indent=4)
         return Response(clean_data, status=S200)

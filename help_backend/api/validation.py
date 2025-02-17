@@ -44,7 +44,7 @@ def validate_user_data(request_data):
             raise ValidationError({"date_of_birth": "Invalid date format. Use 'YYYY-MM-DD'."})
 
     # Validate address fields (if provided, they cannot be empty strings)
-    for field in ["address_street", "address_city", "address_country"]:
+    for field in ["street", "city", "country"]:
         if field in request_data and not request_data[field].strip():
             raise ValidationError({field: f"{field.replace('_', ' ').capitalize()} cannot be empty."})
 
