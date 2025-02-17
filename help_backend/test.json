@@ -1,0 +1,12 @@
+{
+    "username": "john_doe",
+    "email": "john@example.com",
+    "first_name": "John",
+    "last_name": "Doe",
+    "mobile_number": "1234567890",
+    "date_of_birth": "2000-05-10",
+    "address_street": "123 Main St",
+    "address_city": "New York",
+    "address_country": "USA",
+    "profile_image": "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA4ICQoNDhYWFh4ZGx8eHy4sLx8pNzMrLzVQMz61MFJlEK4h8gkZ0ZEB39pbn7//+wA="
+}
