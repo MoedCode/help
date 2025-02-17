@@ -6,27 +6,12 @@ from django.contrib.auth.models import AbstractUser
 class Base(models.Model):
     """Base model with common fields."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    created_date = models.DateField(auto_now_add=True)  # New field for the date only
-    updated_date = models.DateField(auto_now=True)  # New field for the date only
+    created_date = models.DateField(auto_now_add=True)
+    updated_date = models.DateField(auto_now=True)
 
     class Meta:
-        abstract = True  # This ensures Django does not create a separate table for Base
+        abstract = True
 
-class Users(AbstractUser, Base):
-    """Custom user model that inherits from AbstractUser and Base."""
-
-    # Email, first name, and last name fields, ensuring they're required
-    email = models.EmailField(unique=True, blank=False)
-    first_name = models.CharField(max_length=100, blank=False)
-    last_name = models.CharField(max_length=100, blank=False)
-
-    # Profile image field
-    profile_image = models.ImageField(upload_to='profile_images/', null=True, blank=True)
-# Linking user to a group
-    group = models.ForeignKey('Group', on_delete=models.SET_NULL, null=True, blank=True, related_name='members')
-
-    def __str__(self):
-        return self.username
 
 class Group(models.Model):
     """Group that users can belong to."""
@@ -38,17 +23,6 @@ class Group(models.Model):
         return self.name
 
 
-class HelpRequest(models.Model):
-    """Help request from a user, sent to other users in the same group."""
-    user = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='help_requests')
-    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='help_requests')
-    description = models.TextField()
-    request_date = models.DateTimeField(auto_now_add=True)
-    is_resolved = models.BooleanField(default=False)
-
-    def __str__(self):
-        return f"Help Request from {self.user.username} in {self.group.name}"
-
 class Location(models.Model):
     """Model to store location details."""
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
@@ -59,3 +33,56 @@ class Location(models.Model):
 
     def __str__(self):
         return self.address if self.address else f"{self.latitude}, {self.longitude}"
+
+
+class Users(AbstractUser, Base):
+    """Custom user model that inherits from AbstractUser and Base."""
+
+    email = models.EmailField(unique=True, blank=False)
+    first_name = models.CharField(max_length=100, blank=False)
+    last_name = models.CharField(max_length=100, blank=False)
+
+    profile_image = models.ImageField(upload_to='profile_images/', null=True, blank=True)
+    group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True, blank=True, related_name='members')
+
+    # New fields
+    mobile_number = models.CharField(max_length=15, unique=True, blank=False, null=True)
+    date_of_birth = models.DateField(null=True, blank=True)
+
+    # Address fields (separate from Location)
+    address_street = models.CharField(max_length=255, null=True, blank=True)
+    address_city = models.CharField(max_length=100, null=True, blank=True)
+    address_country = models.CharField(max_length=100, null=True, blank=True)
+
+    # User's last known location
+    location = models.OneToOneField(Location, on_delete=models.SET_NULL, null=True, blank=True, related_name="user")
+
+    REQUIRED_FIELDS = ["email", "first_name", "last_name", "mobile_number"]
+
+    def __str__(self):
+        return self.username
+
+
+class HelpRequest(models.Model):
+    """Help request from a user, sent to other users in the same group."""
+    user = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='help_requests')
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='help_requests')
+    location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True, related_name="help_requests")
+    description = models.TextField()
+    request_date = models.DateTimeField(auto_now_add=True)
+    is_resolved = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Help Request from {self.user.username} in {self.group.name}"
+
+
+class Message(models.Model):
+    """Model to handle user-to-user messaging."""
+    sender = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='sent_messages')
+    receiver = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='received_messages')
+    message_text = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Message from {self.sender.username} to {self.receiver.username} at {self.timestamp}"
