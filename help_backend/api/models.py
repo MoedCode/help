@@ -48,3 +48,14 @@ class HelpRequest(models.Model):
 
     def __str__(self):
         return f"Help Request from {self.user.username} in {self.group.name}"
+
+class Location(models.Model):
+    """Model to store location details."""
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    address = models.CharField(max_length=255, null=True, blank=True)
+    city = models.CharField(max_length=100, null=True, blank=True)
+    country = models.CharField(max_length=100, null=True, blank=True)
+
+    def __str__(self):
+        return self.address if self.address else f"{self.latitude}, {self.longitude}"
