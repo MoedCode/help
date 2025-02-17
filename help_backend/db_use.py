@@ -20,3 +20,8 @@ cursorObject = dataBase.cursor()
 cursorObject.execute("CREATE DATABASE elderco")
 
 print("All Done!")
+'''
+Help_Admin
+sirmohamedh@gmail.com
+proEng&root@ADMIN_|25|
+'''
