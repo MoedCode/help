@@ -4,7 +4,7 @@ from . import views
 urlpatterns = [
     path("hi", views.Hi.as_view(), name="hi"),
     path("csrf", views.getCSRFCookie.as_view(), name="csrf"),
-    path("resgister/", views.Register.as_view(), name="resgister"),
+    path("register/", views.Register.as_view(), name="resgister"),
 
 
 ]

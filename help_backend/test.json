@@ -1,12 +1,25 @@
 {
+    "id": "ad25da70-8792-4f47-a56c-03134561b1de",
+    "password": "pbkdf2_sha256$600000$8MDnvc14Eubgr0k0CEULUH$4mcsPuATMrMnZL4ZOHsA065N1aNLCF2K7iKfUsVoKvw=",
     "last_login": null,
     "is_superuser": false,
     "username": "john_doee",
     "is_staff": false,
     "is_active": true,
-    "date_joined": "2025-02-18T00:16:10.708578",
-    "id": "ba59bc30-c2d1-4aa7-80b6-d1d6df51657f",
+    "date_joined": "2025-02-18T00:53:33.432532Z",
+    "created_date": "2025-02-18",
+    "updated_date": "2025-02-18",
     "email": "john@examplee.com",
     "first_name": "Jfohn",
     "last_name": "Doe",
-    "profile_image": 
+    "profile_image": "http://127.0.0.1:8000/john_doee.jpg",
+    "mobile_number": "2234567890",
+    "date_of_birth": "2000-05-10",
+    "street": "123 Main St",
+    "city": "New York",
+    "country": "USA",
+    "group": null,
+    "location": null,
+    "groups": [],
+    "user_permissions": []
+}

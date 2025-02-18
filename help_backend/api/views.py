@@ -8,6 +8,7 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from .models import *
 from api.__init__ import *
 from .validation import *
+from .serializers import *
 import json
 ensure_csrf = method_decorator(ensure_csrf_cookie)
 # Create your views here.
@@ -40,11 +41,11 @@ class Register(APIView):
 
         user.save()  # Now the password is securely stored
 
-        # Serialize user and return response
-        serial_user = user.serializer()
-        print(serial_user)
+        # Serialize the user object using UsersSerializer
+        serializer = UsersSerializer(user, context={"request": request})
 
+        # Write serialized data to test.json for debugging
         with open("test.json", 'w') as jf:
-            json.dump(serial_user, jf, indent=4)
+            json.dump(serializer.data, jf, indent=4)
 
-        return Response(serial_user, status=S200)
+        return Response(serializer.data, status=S200)
