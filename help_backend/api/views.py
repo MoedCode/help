@@ -1,7 +1,7 @@
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from django.contrib.auth import authenticate, login
 from django.middleware.csrf import get_token
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
@@ -52,3 +52,22 @@ class Register(APIView):
             json.dump(serializer.data, jf, indent=4)
 
         return Response(serializer.data, status=S200)
+
+class Login(APIView):
+    def post(self, request):
+        username = request.data.get("username")
+        password = request.data.get("password")
+
+        # Check if both fields are provided
+        if not username or not password:
+            return Response({"error": "Username and password are required"}, status=S400)
+
+        # Authenticate user
+        user = authenticate(username=username, password=password)
+
+        if user:
+            login(request, user)  # Start session
+            serializer = UsersSerializer(user, context={"request": request})
+            return Response({"message": "Login successful", "user": serializer.data}, status=S200)
+        else:
+            return Response({"error": "Invalid credentials"}, status=S401)
