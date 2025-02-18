@@ -5,10 +5,12 @@ from django.contrib.auth import authenticate, login
 from django.middleware.csrf import get_token
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
+from rest_framework.permissions import IsAuthenticated
 from .models import *
 from api.__init__ import *
 from .validation import *
 from .serializers import *
+from django.contrib.auth.models import AnonymousUser
 import json
 ensure_csrf = method_decorator(ensure_csrf_cookie)
 # Create your views here.
@@ -72,3 +74,31 @@ class Login(APIView):
         else:
             return Response({"error": "Invalid credentials"}, status=S401)
 
+class CreateGroup(APIView):
+    permission_classes = [IsAuthenticated]
+
+class CreateGroup(APIView):
+    def post(self, request):
+        username = request.data.get("username")
+        password = request.data.get("password")
+        group_name = request.data.get("group_name")
+        group_description = request.data.get("group_description")
+
+        # Authenticate user
+        user = authenticate(username=username, password=password)
+
+        if user is None or isinstance(user, AnonymousUser):
+            return Response({"error": "Invalid username or password"}, status=S401)
+
+        # Check if user is logged in
+        if not request.user.is_authenticated:
+            return Response({"error": "User must be logged in"}, status=S403)
+
+        # Create new group
+        group = Groups.objects.create(
+            name=group_name,
+            description=group_description,
+            admin_user=user  # Assuming the Group model has an 'admin' field
+        )
+        group.members.add(user)  # Add user as a member
+        return Response({"message": "Group created successfully", "group_id": group.id}, status=S201)

@@ -6,6 +6,7 @@ urlpatterns = [
     path("csrf", views.getCSRFCookie.as_view(), name="csrf"),
     path("register/", views.Register.as_view(), name="resgister"),
     path("login/", views.Login.as_view(), name="login"),
-
+    path("login/", views.Login.as_view(), name="login"),
+    path("create_group/", views.CreateGroup.as_view(), name="create_group"),
 
 ]
