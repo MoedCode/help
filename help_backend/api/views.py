@@ -71,3 +71,4 @@ class Login(APIView):
             return Response({"message": "Login successful", "user": serializer.data}, status=S200)
         else:
             return Response({"error": "Invalid credentials"}, status=S401)
+

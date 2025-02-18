@@ -36,27 +36,6 @@ class Base(models.Model):
             serialized.pop("updated_date")
         return serialized
 
-class Group(models.Model):
-    """Group that users can belong to."""
-    name = models.CharField(max_length=255, unique=True)
-    description = models.TextField(null=True, blank=True)
-    created_date = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return self.name
-
-
-class Location(models.Model):
-    """Model to store location details."""
-    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    address = models.CharField(max_length=255, null=True, blank=True)
-    city = models.CharField(max_length=100, null=True, blank=True)
-    country = models.CharField(max_length=100, null=True, blank=True)
-
-    def __str__(self):
-        return self.address if self.address else f"{self.latitude}, {self.longitude}"
-
 
 class Users(AbstractUser, Base):
     """Custom user model that inherits from AbstractUser and Base."""
@@ -66,24 +45,86 @@ class Users(AbstractUser, Base):
     last_name = models.CharField(max_length=100, blank=False)
 
     profile_image = models.ImageField(upload_to='profile_images/', null=True, blank=True)
-    group = models.ForeignKey(Group, on_delete=models.SET_NULL, null=True, blank=True, related_name='members')
+    # group = models.ForeignKey(Groups, on_delete=models.SET_NULL, null=True, blank=True, related_name='members')
+    group = models.ForeignKey("api.Groups", on_delete=models.SET_NULL, null=True, blank=True, related_name="user_groups")
+
 
     # New fields
     mobile_number = models.CharField(max_length=15, unique=True, blank=False, null=True)
     date_of_birth = models.DateField(null=True, blank=True)
 
-    # Address fields (separate from Location)
+    # Address fields (separate from Locations)
     street = models.CharField(max_length=255, null=True, blank=True)
     city = models.CharField(max_length=100, null=True, blank=True)
     country = models.CharField(max_length=100, null=True, blank=True)
 
     # User's last known location
-    location = models.OneToOneField(Location, on_delete=models.SET_NULL, null=True, blank=True, related_name="user")
+    # location = models.OneToOneField(Locations, on_delete=models.SET_NULL, null=True, blank=True, related_name="user")
+    location = models.ForeignKey("api.Locations", on_delete=models.SET_NULL, null=True, blank=True, related_name="user_location")
 
     REQUIRED_FIELDS = ["email", "first_name", "last_name", "mobile_number"]
 
     def __str__(self):
         return self.username
+class Locations(models.Model):
+    """Model to store location details and associate it with a user."""
+    # user = models.OneToOneField(
+    #     Users, on_delete=models.CASCADE, related_name="location"
+    # )
+    user = models.ForeignKey("api.Users", on_delete=models.CASCADE, related_name="user_location")
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    address = models.CharField(max_length=255, null=True, blank=True)
+    city = models.CharField(max_length=100, null=True, blank=True)
+    country = models.CharField(max_length=100, null=True, blank=True)
+
+    def __str__(self):
+        return f"Locations of {self.user.username} - {self.address or f'{self.latitude}, {self.longitude}'}"
+class Groups(models.Model):
+    """Groups that users can belong to."""
+    name = models.CharField(max_length=255, unique=True)
+    description = models.TextField(null=True, blank=True)
+    created_date = models.DateTimeField(auto_now_add=True)
+
+    admin_user = models.ForeignKey(
+        Users, on_delete=models.CASCADE, related_name="admin_groups"
+    )
+
+    # members = models.ManyToManyField(Users, related_name="groups", blank=True)
+    members = models.ManyToManyField("api.Users", related_name="user_groups")
+
+    def add_member(self, user):
+        """Admin can add users to the group."""
+        if user not in self.members.all():
+            self.members.add(user)
+
+    def remove_member(self, user):
+        """Admin can remove users from the group."""
+        if user in self.members.all():
+            self.members.remove(user)
+
+    def assign_new_admin(self, new_admin):
+        """Admin can assign another user as the admin."""
+        if new_admin in self.members.all():
+            self.admin_user = new_admin
+            self.save()
+
+    def user_exit(self, user):
+        """Allows a user to leave the group, transferring admin if needed."""
+        if user == self.admin_user:
+            members = list(self.members.all())  # Get all members
+            if members:  # If other users exist, assign first member as admin
+                self.admin_user = members[0]
+            else:  # If no members left, delete the group
+                self.delete()
+                return
+        self.members.remove(user)
+        self.save()
+
+    def __str__(self):
+        return f"{self.name} (Admin: {self.admin_user.username})"
+
+
 class Profile(models.Model):
     user = models.OneToOneField(Users, on_delete=models.CASCADE)
     bio = models.TextField(blank=True)
@@ -104,8 +145,8 @@ class Profile(models.Model):
 class HelpRequest(models.Model):
     """Help request from a user, sent to other users in the same group."""
     user = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='help_requests')
-    group = models.ForeignKey(Group, on_delete=models.CASCADE, related_name='help_requests')
-    location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True, blank=True, related_name="help_requests")
+    group = models.ForeignKey(Groups, on_delete=models.CASCADE, related_name='help_requests')
+    location = models.ForeignKey(Locations, on_delete=models.SET_NULL, null=True, blank=True, related_name="help_requests")
     description = models.TextField()
     request_date = models.DateTimeField(auto_now_add=True)
     is_resolved = models.BooleanField(default=False)
