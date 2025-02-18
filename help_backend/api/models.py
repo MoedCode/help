@@ -84,6 +84,21 @@ class Users(AbstractUser, Base):
 
     def __str__(self):
         return self.username
+class Profile(models.Model):
+    user = models.OneToOneField(Users, on_delete=models.CASCADE)
+    bio = models.TextField(blank=True)
+    profileimg = models.ImageField(
+        upload_to="profile_images",
+        default="profile_images/blank-profile-picture.png",
+    )
+    profession = models.CharField(max_length=100, blank=True)
+    location = models.CharField(max_length=100, blank=True)
+    verified = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.user.username
+
 
 
 class HelpRequest(models.Model):

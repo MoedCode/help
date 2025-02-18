@@ -41,6 +41,9 @@ class Register(APIView):
 
         user.save()  # Now the password is securely stored
 
+        # 🔹 Create the Profile instance for the user
+        Profile.objects.create(user=user)
+
         # Serialize the user object using UsersSerializer
         serializer = UsersSerializer(user, context={"request": request})
 
