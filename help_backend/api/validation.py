@@ -4,7 +4,6 @@ from datetime import date
 from django.core.exceptions import ValidationError
 from api.models import Users  # Import the Users model
 
-
 def validate_user_data(request_data):
     """
     Validates user data from the request before creating a Users instance.
@@ -21,10 +20,15 @@ def validate_user_data(request_data):
         raise ValidationError({"extra_keys": f"Invalid fields found: {', '.join(extra_keys)}"})
 
     # Check for missing required fields
-    required_fields = {"email", "first_name", "last_name", "mobile_number"}
+    required_fields = {"email", "first_name", "last_name", "mobile_number", "password"}
     missing_fields = required_fields - request_data.keys()
     if missing_fields:
         raise ValidationError({"missing_fields": f"Missing required fields: {', '.join(missing_fields)}"})
+
+    # Validate password (must be at least 8 characters)
+    password = request_data.get("password", "")
+    if len(password) < 8:
+        raise ValidationError({"password": "Password must be at least 8 characters long."})
 
     # Validate mobile number (only digits, 10-15 characters)
     mobile_number = request_data.get("mobile_number", "")

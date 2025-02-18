@@ -27,8 +27,24 @@ class getCSRFCookie(APIView):
 class Register(APIView):
     def post(self, request):
         clean_data = validate_user_data(request.data)
-        # user = Users.objects.create(**clean_data)
-        # test = user.__dict__
+
+        # Extract password before passing to model
+        password = clean_data.pop("password", None)
+
+        # Create user instance (without password)
+        user = Users(**clean_data)
+
+        # Hash the password properly
+        if password:
+            user.set_password(password)  # 🔑 Hashes the password
+
+        user.save()  # Now the password is securely stored
+
+        # Serialize user and return response
+        serial_user = user.serializer()
+        print(serial_user)
+
         with open("test.json", 'w') as jf:
-            json.dump(clean_data , jf, indent=4)
-        return Response(clean_data, status=S200)
+            json.dump(serial_user, jf, indent=4)
+
+        return Response(serial_user, status=S200)

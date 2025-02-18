@@ -2,6 +2,7 @@ from datetime import datetime
 import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+time_format = "%Y-%m-%dT%H:%M:%S.%f"
 
 class Base(models.Model):
     """Base model with common fields."""
@@ -11,7 +12,29 @@ class Base(models.Model):
 
     class Meta:
         abstract = True
+    def to_dict(self):
+        new_dict = self.__dict__.copy()
+        new_dict['id'] = str(new_dict['id'])
+        if "created_date" in new_dict:
+            new_dict['created_date'] = new_dict['created_date'].strftime(time_format)
+        if "updated_date" in new_dict:
+            new_dict['updated_date'] = new_dict['updated_date'].strftime(time_format)
+        new_dict.pop('_state', None)
+        if 'date_joined' in new_dict:
+            new_dict['date_joined'] = new_dict['date_joined'].strftime(time_format)
 
+        if 'user_id' in new_dict:
+            new_dict['user_id'] = str(new_dict['user_id'])
+        return new_dict
+    def serializer(self):
+        serialized = self.to_dict()
+        if 'password' in serialized:
+            serialized.pop("password")
+        if 'created_date' in serialized:
+            serialized.pop("created_date")
+        if 'updated_date' in serialized:
+            serialized.pop("updated_date")
+        return serialized
 
 class Group(models.Model):
     """Group that users can belong to."""

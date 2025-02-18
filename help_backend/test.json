@@ -1,12 +1,12 @@
 {
-    "username": "john_doe",
-    "email": "john@example.com",
-    "first_name": "John",
+    "last_login": null,
+    "is_superuser": false,
+    "username": "john_doee",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2025-02-18T00:16:10.708578",
+    "id": "ba59bc30-c2d1-4aa7-80b6-d1d6df51657f",
+    "email": "john@examplee.com",
+    "first_name": "Jfohn",
     "last_name": "Doe",
-    "mobile_number": "1234567890",
-    "date_of_birth": "2000-05-10",
-    "street": "123 Main St",
-    "city": "New York",
-    "country": "USA",
-    "profile_image": "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAA4ICQoNDhYWFh4ZGx8eHy4sLx8pNzMrLzVQMz61MFJlEK4h8gkZ0ZEB39pbn7//+wA="
-}
+    "profile_image": 
