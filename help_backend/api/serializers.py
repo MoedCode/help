@@ -7,7 +7,7 @@ class UsersSerializerAll(serializers.ModelSerializer):
 class UsersSerializer(serializers.ModelSerializer):
     class Meta:
         model = Users
-        fields = ["username", "email", "first_name", "last_name", "profile_image"]
+        fields = ["username", "email", "first_name", "last_name", "profile_image", "id"]
         # fields = "__all__"
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -34,3 +34,11 @@ class HelpRequestSerializer(serializers.ModelSerializer):
         model = HelpRequest
 
         fields = "__all__"
+classesSerializers = {
+    "users":UsersSerializer,
+    "profile":ProfileSerializer,
+    "locations":LocationsSerializer,
+    "helpRequest":HelpRequestSerializer,
+    "message":MessageSerializer,
+
+}

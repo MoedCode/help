@@ -13,6 +13,7 @@ from .validation import *
 from .serializers import *
 from django.contrib.auth.models import AnonymousUser
 import json
+from django.core.exceptions import FieldError
 ensure_csrf = method_decorator(ensure_csrf_cookie)
 # Create your views here.
 class Hi(APIView):
@@ -254,6 +255,38 @@ class DeleteUser(APIView):
         user.delete()
 
         return Response({"message": "Account deleted successfully"}, status=S200)
+class GetUserData(APIView):
+    permission_classes = [IsAuthenticated]  # Ensure authentication is required
+
+    def post(self, request):
+        # Extract username and password from request body
+        username = request.data.get("username")
+        password = request.data.get("password")
+
+        if not username or not password:
+            return Response({"error": "Username and password are required."}, status=400)
+
+        # Authenticate the user
+        user = authenticate(username=username, password=password)
+
+        if user is None:
+            return Response({"error": "Invalid credentials."}, status=401)
+
+        # Ensure the authenticated user matches the logged-in user
+        if request.user != user:
+            return Response({"error": "Unauthorized access."}, status=403)
+
+        # Fetch user and profile data
+        user_data = UsersSerializer(user).data
+        profile = Profile.objects.filter(user=user).first()
+        profile_data = ProfileSerializer(profile).data if profile else {}
+
+        return Response({
+            "user": user_data,
+            "profile": profile_data
+        })
+
+"""
 class Search(APIView):
     permission_classes = [IsAuthenticated]
     def post(self, request):
@@ -277,11 +310,100 @@ class Search(APIView):
             print(f"\n\n\n {serial_user} \n\n\n")
 
             return Response(serial_user, status=S200)
-
+        # try:
         Class = classes[category]
-
-
+        ClassSerializor = classesSerializers[category]
+        queryObjt = Class.objects.filter(**query).first()
+        serializedObject = ClassSerializor(queryObjt, context={"request":request})
+        return Response(serializedObject, S200)
+        # except Exception as e:
+            # return Response({"error":str(e)})
         # except Exception as e:
         #     return Response({"error":str(e)}, S400)
+"""
 
+'''
+class Search(APIView):
+    permission_classes = [IsAuthenticated]
 
+    def post(self, request):
+        category = request.data.get("category", "").lower()
+        key = request.data.get("key")
+        value = request.data.get("value")
+
+        if not category or not key or value is None:
+            return Response({"error": "Missing required fields (category, key, or value)."}, S400)
+
+        search_methods = {
+            "user": self.search_user,
+            "users": self.search_user,
+            "profile": self.search_profile,
+            "profiles": self.search_profile,
+            "group": self.search_group,
+            "groups": self.search_group,
+            "message": self.search_message,
+            "messages": self.search_message,
+        }
+
+        if category not in search_methods:
+            return Response({"error": f"Category '{category}' does not exist."}, S404)
+
+        return search_methods[category](request, key, value)
+
+    def search_user(self, request, key, value):
+        """Search for a user, ensuring the requester can only access their own data."""
+        try:
+            user = Users.objects.filter(**{key: value}).first()
+            if not user:
+                return Response({"error": f"User '{value}' not found."}, S404)
+
+            if request.user != user:
+                return Response({"error": "Not authorized to view this user."}, S403)
+
+            serialized_user = UsersSerializer(user, context={"request": request}).data
+            return Response(serialized_user, S200)
+        except FieldError:
+            return Response({"error": f"Invalid search key '{key}' for Users."}, S400)
+
+    def search_profile(self, request, key, value):
+        """Search for a profile linked to the requesting user."""
+        try:
+            profile = Profile.objects.filter(user=request.user, **{key: value}).first()
+            if not profile:
+                return Response({"error": f"Profile '{value}' not found."}, S404)
+
+            serialized_profile = ProfileSerializer(profile, context={"request": request}).data
+            return Response(serialized_profile, S200)
+        except FieldError:
+            return Response({"error": f"Invalid search key '{key}' for Profile."}, S400)
+
+    def search_group(self, request, key, value):
+        """Search for a group (users can search for groups they belong to)."""
+        try:
+            group = Groups.objects.filter(members=request.user, **{key: value}).first()
+            if not group:
+                return Response({"error": f"Group '{value}' not found or you are not a member."}, S404)
+
+            serialized_group = GroupsSerializer(group, context={"request": request}).data
+            return Response(serialized_group, S200)
+        except FieldError:
+            return Response({"error": f"Invalid search key '{key}' for Group."}, S400)
+
+    def search_message(self, request, key, value):
+        """Search for messages where the requester is the sender or receiver."""
+        try:
+            message = Message.objects.filter(
+                sender=request.user, **{key: value}
+            ).first() or Message.objects.filter(
+                receiver=request.user, **{key: value}
+            ).first()
+
+            if not message:
+                return Response({"error": f"Message '{value}' not found."}, S404)
+
+            serialized_message = MessageSerializer(message, context={"request": request}).data
+            return Response(serialized_message, S200)
+        except FieldError:
+            return Response({"error": f"Invalid search key '{key}' for Message."}, S400)
+
+'''
