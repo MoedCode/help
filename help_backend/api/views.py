@@ -245,7 +245,7 @@ class DeleteUser(APIView):
 
         # Ensure the user is deleting their own account
         if request.user != user:
-            return Response({"error": "You can only delete your own account"}, status=S403)
+            return Response({"error": "login user name and password required"}, status=S403)
 
         # Log out the user if they are authenticated
         logout(request)
