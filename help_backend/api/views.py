@@ -132,7 +132,7 @@ class AddUserToGroup(APIView):
             return Response({"error": "Group not found"}, status=S404)
 
         # Check if admin user is the group's admin
-        if group.admin != admin_user:
+        if group.admin_user != admin_user:
             return Response({"error": "Only the group admin can add users"}, status=S403)
 
         # Check if the user to be added exists
