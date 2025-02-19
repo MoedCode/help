@@ -28,6 +28,7 @@ class getCSRFCookie(APIView):
     @ensure_csrf
     def get(self, request):
         return Response({"csrfToken": get_token(request)})
+
 class Register(APIView):
     def post(self, request):
         clean_data = validate_user_data(request.data)
@@ -182,3 +183,74 @@ class AddUserToGroup(APIView):
         # Add user to group
         group.members.add(add_user)
         return Response({"message": f"{add_username} added to {group.name} successfully"}, status=S200)
+class RemoveUserFromGroup(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        print(f"\n\nrequest header\n\n")
+        group_identifier = request.data.get("group_name") or request.data.get("group_id")
+        admin_username = request.data.get("admin_username")
+        remove_username = request.data.get("remove_username")
+
+        # Validate input
+        if not all([group_identifier, admin_username, remove_username]):
+            return Response({"error": "Missing required fields"}, status=S400)
+
+        # Check if admin user exists and is authenticated
+        admin_user = Users.objects.filter(username=admin_username).first()
+        if not admin_user or not admin_user.is_authenticated:
+            return Response({"error": "Invalid or unauthenticated admin user"}, status=S401)
+
+        # Find the group by name or ID
+        group = None
+        if isinstance(group_identifier, int):  # If group_id is given
+            group = Groups.objects.filter(id=group_identifier).first()
+        else:  # If group_name is given
+            group = Groups.objects.filter(name=group_identifier).first()
+
+        if not group:
+            return Response({"error": "Group not found"}, status=S404)
+
+        # Check if admin user is the group's admin
+        if group.admin_user != admin_user:
+            return Response({"error": "Only the group admin can remove users"}, status=S403)
+
+        # Check if the user to be removed exists
+        remove_user = Users.objects.filter(username=remove_username).first()
+        if not remove_user:
+            return Response({"error": "User to be removed not found"}, status=S404)
+
+        # Check if the user is in the group
+        if remove_user not in group.members.all():
+            return Response({"error": "User is not a member of this group"}, status=S400)
+
+        # Remove user from group
+        group.members.remove(remove_user)
+        return Response({"message": f"{remove_username} removed from {group.name} successfully"}, status=S200)
+class DeleteSelfAccount(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request):
+        username = request.data.get("username")
+        password = request.data.get("password")
+
+        # Validate input
+        if not username or not password:
+            return Response({"error": "Username and password are required"}, status=S.S400)
+
+        # Authenticate user
+        user = authenticate(username=username, password=password)
+        if not user:
+            return Response({"error": "Invalid credentials"}, status=S.S401)
+
+        # Ensure the user is deleting their own account
+        if request.user != user:
+            return Response({"error": "You can only delete your own account"}, status=S.S403)
+
+        # Log out the user if they are authenticated
+        logout(request)
+
+        # Delete user account
+        user.delete()
+
+        return Response({"message": "Account deleted successfully"}, status=S.S200)

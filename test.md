@@ -1,3 +1,10 @@
+get csrf token
+http://127.0.0.1:8000/api/csrf
+
+ add in next request  in headers section in request
+ key : X-CSRFToken
+ alue: <the obtained token >
+
 # user1
 ## register
 ```json
@@ -72,4 +79,13 @@
     "admin_username": "john_doee",
     "add_username": "max_john_doee"
 }
+```
+# add user to the group
+```json
+{
+    "group_name": "Tech Enthusiasts",
+    "admin_username": "john_doee",
+    "remove_username": "max_john_doee"
+}
+
 ```
