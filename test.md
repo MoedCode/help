@@ -1,4 +1,5 @@
-#user1 register
+# user1
+## register
 ```json
 {
     "username": "john_doee",
@@ -6,7 +7,7 @@
     "first_name": "Jfohn",
     "last_name": "Doe",
     "mobile_number": "2234567890",
-    "date_of_birth": "2000-05-10",
+    "date_of_birth": "1980-05-10",
     "password":"Joh_M$25xo",
     "street": "123 Main St",
     "city": "New York",
@@ -15,14 +16,23 @@
 }
 
 ```
-#user1 register
+## login
+```json
+{
+    "username": "john_doee",
+    "password":"Joh_M$25xo"
+}
+
+```
+
+# user2 register
 ```json
 {
     "username": "max_john_doee",
     "email": "max@examplee.com",
     "first_name": "max",
     "last_name": "Doe",
-    "mobile_number": "2234567890",
+    "mobile_number": "2134567890",
     "date_of_birth": "2000-05-10",
     "password":"Joh_M$25xo",
     "street": "123 Main St",
@@ -30,8 +40,17 @@
     "country": "USA",
     "profile_image": "john_doee.jpg"
 }
+```
+# login
+```json
+{
+    "username": "max_john_doee",
+    "password":"Joh_M$25xo"
+}
 
 ```
+
+
 # create group
 
 ```json

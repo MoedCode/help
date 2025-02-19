@@ -1,20 +1,40 @@
-tnis add group class .. now  make class for add user  to group
-request contain ..
-group_name or group_id , admin_username , add_username,
-group  admin username  a
-addUseToGroup must check that the group is exist then  admin_user is exist and logged in and  group admin
-and add_user is exist
-if all hat met it
+in postman in  cookies section after i logged in
 
+```
+No cookies received from the server
+All your cookies and their associated domains will appear here.
+```
+request
+```json
+
+{
+    "username": "john_doee",
+    "password":"Joh_M$25xo"
+}
+
+
+```
+endpoint
 ```py
-
-class addUseToGroup(APIView):
-    permission_classes = [IsAuthenticated]
+class Login(APIView):
     def post(self, request):
         username = request.data.get("username")
-        group_name = request.data.get("group_name")
-        user=Users.objects.filter(username=username)
-        if not user:
+        password = request.data.get("password")
+
+        # Check if both fields are provided
+        if not username or not password:
+            return Response({"error": "Username and password are required"}, status=S400)
+
+        # Authenticate user
+        user = authenticate(username=username, password=password)
+
+        if user:
+            login(request, user)  # Start session
+            serializer = UsersSerializer(user, context={"request": request})
+            return Response({"message": "Login successful", "user": serializer.data}, status=S200)
+        else:
+            return Response({"error": "Invalid credentials"}, status=S401)
+
 
 
 ```

@@ -6,7 +6,7 @@ from django.middleware.csrf import get_token
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import permissions
+from rest_framework import permissions, generics
 from .models import *
 from api.__init__ import *
 from .validation import *
@@ -70,11 +70,23 @@ class Login(APIView):
 
         if user:
             login(request, user)  # Start session
-            serializer = UsersSerializer(user, context={"request": request})
-            return Response({"message": "Login successful", "user": serializer.data}, status=S200)
+
+            # Get CSRF token
+            csrf_token = get_token(request)
+
+            # Create response
+            response = Response(
+                {"message": "Login successful", "user": {"username": user.username}},
+                status=S200
+            )
+
+            # Set session ID and CSRF token in cookies
+            response.set_cookie(key="sessionid", value=request.session.session_key, httponly=True, secure=False, samesite="Lax")
+            response.set_cookie(key="csrftoken", value=csrf_token, secure=False, samesite="Lax")
+
+            return response
         else:
             return Response({"error": "Invalid credentials"}, status=S401)
-
 
 class Logout(APIView):
     permission_classes = (permissions.AllowAny,)
@@ -112,6 +124,23 @@ class CreateGroup(APIView):
         )
         group.members.add(user)  # Add user as a member
         return Response({"message": "Group created successfully", "group_id": group.id}, status=S201)
+
+class ProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            username = request.data.get("username")
+            user = Users.objects.filter(username=username).first()
+            profile = Profile.objects.filter(user=user).first()
+            serialized_profile = ProfileSerializer(profile, context={"request": request})
+            return Response(
+                serialized_profile, status=S200
+            )
+        except Exception as e:
+            return Response(
+                {"error":str(e)}, status=S500
+            )
 
 
 class AddUserToGroup(APIView):
