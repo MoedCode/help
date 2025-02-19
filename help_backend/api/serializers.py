@@ -5,3 +5,28 @@ class UsersSerializer(serializers.ModelSerializer):
         model = Users
         # fields = ["username", "email", "first_name", "last_name", "profile_image"]
         fields = "__all__"
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+
+        fields = "__all__"
+class GroupsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Groups
+
+        fields = "__all__"
+class LocationsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Locations
+
+        fields = "__all__"
+class MessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Message
+
+        fields = "__all__"
+class HelpRequestSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = HelpRequest
+
+        fields = "__all__"
