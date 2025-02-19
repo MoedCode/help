@@ -124,9 +124,9 @@ class AddUserToGroup(APIView):
         # Find the group by name or ID
         group = None
         if isinstance(group_identifier, int):  # If group_id is given
-            group = Group.objects.filter(id=group_identifier).first()
+            group = Groups.objects.filter(id=group_identifier).first()
         else:  # If group_name is given
-            group = Group.objects.filter(name=group_identifier).first()
+            group = Groups.objects.filter(name=group_identifier).first()
 
         if not group:
             return Response({"error": "Group not found"}, status=S404)
