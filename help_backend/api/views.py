@@ -1,11 +1,12 @@
 
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login,  logout
 from django.middleware.csrf import get_token
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import ensure_csrf_cookie
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import permissions
 from .models import *
 from api.__init__ import *
 from .validation import *
@@ -73,6 +74,15 @@ class Login(APIView):
             return Response({"message": "Login successful", "user": serializer.data}, status=S200)
         else:
             return Response({"error": "Invalid credentials"}, status=S401)
+
+
+class Logout(APIView):
+    permission_classes = (permissions.AllowAny,)
+    authentication_classes = ()
+
+    def post(self, request):
+        logout(request)
+        return Response(status=S200)
 
 class CreateGroup(APIView):
     permission_classes = [IsAuthenticated]
