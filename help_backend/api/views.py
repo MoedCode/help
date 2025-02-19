@@ -102,3 +102,44 @@ class CreateGroup(APIView):
         )
         group.members.add(user)  # Add user as a member
         return Response({"message": "Group created successfully", "group_id": group.id}, status=S201)
+
+
+class AddUserToGroup(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        group_identifier = request.data.get("group_name") or request.data.get("group_id")
+        admin_username = request.data.get("admin_username")
+        add_username = request.data.get("add_username")
+
+        # Validate input
+        if not all([group_identifier, admin_username, add_username]):
+            return Response({"error": "Missing required fields"}, status=S400)
+
+        # Check if admin user exists
+        admin_user = Users.objects.filter(username=admin_username).first()
+        if not admin_user or not admin_user.is_authenticated:
+            return Response({"error": "Invalid or unauthenticated admin user"}, status=S401)
+
+        # Find the group by name or ID
+        group = None
+        if isinstance(group_identifier, int):  # If group_id is given
+            group = Group.objects.filter(id=group_identifier).first()
+        else:  # If group_name is given
+            group = Group.objects.filter(name=group_identifier).first()
+
+        if not group:
+            return Response({"error": "Group not found"}, status=S404)
+
+        # Check if admin user is the group's admin
+        if group.admin != admin_user:
+            return Response({"error": "Only the group admin can add users"}, status=S403)
+
+        # Check if the user to be added exists
+        add_user = Users.objects.filter(username=add_username).first()
+        if not add_user:
+            return Response({"error": "User to be added not found"}, status=S404)
+
+        # Add user to group
+        group.members.add(add_user)
+        return Response({"message": f"{add_username} added to {group.name} successfully"}, status=S200)
