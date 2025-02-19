@@ -227,25 +227,25 @@ class RemoveUserFromGroup(APIView):
         # Remove user from group
         group.members.remove(remove_user)
         return Response({"message": f"{remove_username} removed from {group.name} successfully"}, status=S200)
-class DeleteSelfAccount(APIView):
+class DeleteUser(APIView):
     permission_classes = [IsAuthenticated]
 
-    def delete(self, request):
+    def post(self, request):
         username = request.data.get("username")
         password = request.data.get("password")
 
         # Validate input
         if not username or not password:
-            return Response({"error": "Username and password are required"}, status=S.S400)
+            return Response({"error": "Username and password are required"}, status=S400)
 
         # Authenticate user
         user = authenticate(username=username, password=password)
         if not user:
-            return Response({"error": "Invalid credentials"}, status=S.S401)
+            return Response({"error": "Invalid credentials"}, status=S401)
 
         # Ensure the user is deleting their own account
         if request.user != user:
-            return Response({"error": "You can only delete your own account"}, status=S.S403)
+            return Response({"error": "You can only delete your own account"}, status=S403)
 
         # Log out the user if they are authenticated
         logout(request)
@@ -253,4 +253,4 @@ class DeleteSelfAccount(APIView):
         # Delete user account
         user.delete()
 
-        return Response({"message": "Account deleted successfully"}, status=S.S200)
+        return Response({"message": "Account deleted successfully"}, status=S200)
