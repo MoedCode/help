@@ -1,10 +1,14 @@
 from rest_framework import serializers
 from api.models import *
+class UsersSerializerAll(serializers.ModelSerializer):
+    class Meta:
+        model = Users
+        fields = "__all__"
 class UsersSerializer(serializers.ModelSerializer):
     class Meta:
         model = Users
-        # fields = ["username", "email", "first_name", "last_name", "profile_image"]
-        fields = "__all__"
+        fields = ["username", "email", "first_name", "last_name", "profile_image"]
+        # fields = "__all__"
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile

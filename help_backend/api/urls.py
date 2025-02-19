@@ -13,5 +13,6 @@ urlpatterns = [
     path("create_group/", views.CreateGroup.as_view(), name="create_group"),
     path("add_user_to_group/", views.AddUserToGroup.as_view(), name="add_user_to_group"),
     path("remove_user_from_group/", views.RemoveUserFromGroup.as_view(), name="remove_user_from_group"),
+    path("search/", views.Search.as_view(), name="search"),
 
 ]

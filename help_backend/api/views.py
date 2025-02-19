@@ -49,7 +49,7 @@ class Register(APIView):
         Profile.objects.create(user=user)
 
         # Serialize the user object using UsersSerializer
-        serializer = UsersSerializer(user, context={"request": request})
+        serializer = UsersSerializer(user, context={"request": request}).data
 
         # Write serialized data to test.json for debugging
         with open("test.json", 'w') as jf:
@@ -245,7 +245,7 @@ class DeleteUser(APIView):
 
         # Ensure the user is deleting their own account
         if request.user != user:
-            return Response({"error": "login user name and password required"}, status=S403)
+            return Response({"error": "login  required"}, status=S403)
 
         # Log out the user if they are authenticated
         logout(request)
@@ -254,3 +254,34 @@ class DeleteUser(APIView):
         user.delete()
 
         return Response({"message": "Account deleted successfully"}, status=S200)
+class Search(APIView):
+    permission_classes = [IsAuthenticated]
+    def post(self, request):
+        # try:
+        category = request.data.get("category")
+        key = request.data.get("key")
+        value = request.data.get("value")
+
+        category = category.lower()
+        query = {key:value}
+
+        if category not in classes.keys():
+            return Response({"errror":f"category {category} is not exxist "}, S404)
+        if category in ["user", "users"]:
+            user = Users.objects.filter(**query).first()
+            if not user:
+                return Response({"error":f"cant find user {value}"}, status=S404)
+            if request.user != user:
+                return Response({"error": "not authorized"}, status=S401)
+            serial_user = UsersSerializer(user, context={"request": request}).data
+            print(f"\n\n\n {serial_user} \n\n\n")
+
+            return Response(serial_user, status=S200)
+
+        Class = classes[category]
+
+
+        # except Exception as e:
+        #     return Response({"error":str(e)}, S400)
+
+

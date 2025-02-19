@@ -165,3 +165,20 @@ class Message(models.Model):
 
     def __str__(self):
         return f"Message from {self.sender.username} to {self.receiver.username} at {self.timestamp}"
+
+Classes = {
+    "Users":Users,
+    "Profile":Profile,
+    "Locations":Locations,
+    "HelpRequest":HelpRequest,
+    "Message":Message,
+
+}
+classes = {
+    "users":Users,
+    "profile":Profile,
+    "locations":Locations,
+    "helpRequest":HelpRequest,
+    "message":Message,
+
+}
