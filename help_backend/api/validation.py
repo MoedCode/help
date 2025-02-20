@@ -53,3 +53,40 @@ def validate_user_data(request_data):
             raise ValidationError({field: f"{field.replace('_', ' ').capitalize()} cannot be empty."})
 
     return request_data  # Return cleaned data if valid
+def validate_profile_update(data):
+    """
+    Validate and filter profile update data.
+
+    - Keeps only allowed keys.
+    - Ensures correct data types.
+    - Returns (True, valid_data) if valid.
+    - Returns (False, errors) if there are invalid fields.
+    """
+
+    # Allowed keys and their expected types
+    allowed_keys = {
+        "bio": str,
+        "profileimg": str,  # Assuming it's a file path or URL
+        "profession": str,
+        "location": str,
+        "verified": bool,
+    }
+
+    valid_data = {}
+    errors = {}
+
+    for key, value in data.items():
+        if key in allowed_keys:
+            # Check if value matches expected type
+            if isinstance(value, allowed_keys[key]):
+                valid_data[key] = value
+            else:
+                errors[key] = f"Expected {allowed_keys[key].__name__}, got {type(value).__name__}."
+        else:
+            errors[key] = "Invalid field."
+
+    # If errors exist, return False with error messages
+    if errors:
+        return False, errors
+
+    return True, valid_data  # If everything is valid, return True with filtered data

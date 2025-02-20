@@ -337,12 +337,29 @@ class UserUpdate(APIView):
         return Response({"message": "User data updated successfully.", "user": serializer.data}, status=S200)
 
 
-    # class ProfileUpdate(APIView):
-    #     """ Pofile Update Endpoint Class"""
-    #     permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access
-    #     def put(self, request):
-    #         if request.user =
+class ProfileUpdate(APIView):
+    """ Pofile Update Endpoint Class"""
+    permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access
+    def put(self, request):
+        is_valid , result = validate_profile_update(request.data)
+        if not is_valid:
+            return Response(result, S400)
+        # if request.user.is_auth:
+        #     return Response({"error": "Unauthorized access."}, status=S403)
 
+        profile = Profile.objects.filter(user=request.user).first()
+        if not profile:
+            try:
+                profile = Profile.objects.create(user=request.user)
+            except Exception as e:
+                return Response({"error":str(e)}, S500)
+
+
+        for field, value in result.items():
+            setattr(profile, field, value)
+        profile.save()
+        serializer = ProfileSerializer(profile).data
+        return Response(serializer, S200)
 
 """
 class Search(APIView):

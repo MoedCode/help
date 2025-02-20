@@ -15,5 +15,6 @@ urlpatterns = [
     path("remove_user_from_group/", views.RemoveUserFromGroup.as_view(), name="remove_user_from_group"),
     path("user_data/", views.GetUserData.as_view(), name="user_data"),
     path("user_update/", views.UserUpdate.as_view(), name="user_update"),
+    path("profile_update/", views.ProfileUpdate.as_view(), name="profile_update"),
 
 ]

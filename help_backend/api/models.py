@@ -93,7 +93,6 @@ class Groups(Base):
     """Groups that users can belong to."""
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(null=True, blank=True)
-    created_date = models.DateTimeField(auto_now_add=True)
 
     admin_user = models.ForeignKey(
         Users, on_delete=models.CASCADE, related_name="admin_groups"
@@ -144,7 +143,7 @@ class Profile(Base):
     profession = models.CharField(max_length=100, blank=True)
     location = models.CharField(max_length=100, blank=True)
     verified = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
+
 
     def __str__(self):
         return self.user.username
