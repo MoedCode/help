@@ -285,7 +285,56 @@ class GetUserData(APIView):
             "user": user_data,
             "profile": profile_data
         })
+class UserUpdate(APIView):
+    permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access
 
+    def put(self, request):
+        # Extract username, password, and update_data from request body
+        username = request.data.get("username")
+        password = request.data.get("password")
+        update_data = request.data.get("update_data", {})
+
+        if not username or not password:
+            return Response({"error": "Username and password are required."}, status=S400)
+
+        if not update_data:
+            return Response({"error": "No update data provided."}, status=S400)
+
+        # Authenticate the user
+        user = authenticate(username=username, password=password)
+
+        if user is None:
+            return Response({"error": "Invalid credentials."}, status=S401)
+
+        # Ensure the authenticated user matches the logged-in user
+        if request.user != user:
+            return Response({"error": "Unauthorized access."}, status=S403)
+
+        try:
+            # Validate the update data
+            cleaned_data = validate_user_data(update_data)
+        except ValidationError as e:
+            return Response({"error": e.detail}, status=S400)
+
+        # Check if password is being updated
+        new_password = cleaned_data.pop("password", None)
+
+        # Update user fields
+        for field, value in cleaned_data.items():
+            setattr(user, field, value)
+
+        # Handle password update separately
+        if new_password:
+            user.set_password(new_password)
+            user.save()
+            logout(request)  # Log out the user after password change
+            return Response({"message": "Password updated successfully. Please log in again."}, status=S200)
+
+        user.save()
+
+        # Serialize and return updated user data
+        serializer = UsersSerializer(user)
+        return Response({"message": "User data updated successfully.", "user": serializer.data}, status=S200)
 """
 class Search(APIView):
     permission_classes = [IsAuthenticated]
