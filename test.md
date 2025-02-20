@@ -72,7 +72,7 @@ http://127.0.0.1:8000/api/csrf
 
 
 ```
-# login
+# login user2
 ```json
 {
     "username": "max_john_doee",

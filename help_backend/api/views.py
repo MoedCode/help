@@ -50,7 +50,7 @@ class Register(APIView):
         Profile.objects.create(user=user)
 
         # Serialize the user object using UsersSerializer
-        serializer = UsersSerializer(user, context={"request": request}).data
+        serializer = UsersSerializer(user, context={"request": request})
 
         # Write serialized data to test.json for debugging
         with open("test.json", 'w') as jf:
@@ -335,6 +335,15 @@ class UserUpdate(APIView):
         # Serialize and return updated user data
         serializer = UsersSerializer(user)
         return Response({"message": "User data updated successfully.", "user": serializer.data}, status=S200)
+
+
+    # class ProfileUpdate(APIView):
+    #     """ Pofile Update Endpoint Class"""
+    #     permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access
+    #     def put(self, request):
+    #         if request.user =
+
+
 """
 class Search(APIView):
     permission_classes = [IsAuthenticated]

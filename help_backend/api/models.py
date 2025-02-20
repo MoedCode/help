@@ -1,41 +1,50 @@
 from datetime import datetime
+from django.utils import timezone
 import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 time_format = "%Y-%m-%dT%H:%M:%S.%f"
 
+time_format = "%Y-%m-%d %H:%M:%S"  # Format: YYYY-MM-DD HH:MM:SS
+
 class Base(models.Model):
     """Base model with common fields."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    created_date = models.DateField(auto_now_add=True)
-    updated_date = models.DateField(auto_now=True)
+    created_date = models.DateTimeField(default=timezone.now, editable=False)  # ✅ Immutable, defaults to now
+    updated_date = models.DateTimeField(auto_now=True)  # ✅ Auto-updates on modification
 
     class Meta:
-        abstract = True
+        abstract = True  # ✅ Ensures Django doesn't create a `Base` table
+
+    def to_save(self, *args, **kwargs):
+        """Prevent modification of created_date"""
+        if self.pk:  # If object exists, prevent modification of created_date
+            old_instance = self.__class__.objects.get(pk=self.pk)
+            self.created_date = old_instance.created_date  # Keep original value
+        super().save(*args, **kwargs)
+
     def to_dict(self):
+        """Convert model instance to dictionary, formatting date fields."""
         new_dict = self.__dict__.copy()
         new_dict['id'] = str(new_dict['id'])
-        if "created_date" in new_dict:
-            new_dict['created_date'] = new_dict['created_date'].strftime(time_format)
-        if "updated_date" in new_dict:
-            new_dict['updated_date'] = new_dict['updated_date'].strftime(time_format)
-        new_dict.pop('_state', None)
+        new_dict['created_date'] = self.created_date.strftime(time_format)
+        new_dict['updated_date'] = self.updated_date.strftime(time_format)
+        new_dict.pop('_state', None)  # Remove internal Django state
+
         if 'date_joined' in new_dict:
             new_dict['date_joined'] = new_dict['date_joined'].strftime(time_format)
 
         if 'user_id' in new_dict:
             new_dict['user_id'] = str(new_dict['user_id'])
-        return new_dict
-    def serializer(self):
-        serialized = self.to_dict()
-        if 'password' in serialized:
-            serialized.pop("password")
-        if 'created_date' in serialized:
-            serialized.pop("created_date")
-        if 'updated_date' in serialized:
-            serialized.pop("updated_date")
-        return serialized
 
+        return new_dict
+
+    def inttant_serializer(self):
+        """Convert instance to dictionary but hide sensitive fields."""
+        serialized = self.to_dict()
+        for field in ["password", "created_date", "updated_date"]:
+            serialized.pop(field, None)  # ✅ Safely remove sensitive fields
+        return serialized
 
 class Users(AbstractUser, Base):
     """Custom user model that inherits from AbstractUser and Base."""
@@ -66,7 +75,7 @@ class Users(AbstractUser, Base):
 
     def __str__(self):
         return self.username
-class Locations(models.Model):
+class Locations(Base):
     """Model to store location details and associate it with a user."""
     # user = models.OneToOneField(
     #     Users, on_delete=models.CASCADE, related_name="location"
@@ -80,7 +89,7 @@ class Locations(models.Model):
 
     def __str__(self):
         return f"Locations of {self.user.username} - {self.address or f'{self.latitude}, {self.longitude}'}"
-class Groups(models.Model):
+class Groups(Base):
     """Groups that users can belong to."""
     name = models.CharField(max_length=255, unique=True)
     description = models.TextField(null=True, blank=True)
@@ -125,7 +134,7 @@ class Groups(models.Model):
         return f"{self.name} (Admin: {self.admin_user.username})"
 
 
-class Profile(models.Model):
+class Profile(Base):
     user = models.OneToOneField(Users, on_delete=models.CASCADE)
     bio = models.TextField(blank=True)
     profileimg = models.ImageField(
@@ -142,7 +151,7 @@ class Profile(models.Model):
 
 
 
-class HelpRequest(models.Model):
+class HelpRequest(Base):
     """Help request from a user, sent to other users in the same group."""
     user = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='help_requests')
     group = models.ForeignKey(Groups, on_delete=models.CASCADE, related_name='help_requests')
@@ -155,7 +164,7 @@ class HelpRequest(models.Model):
         return f"Help Request from {self.user.username} in {self.group.name}"
 
 
-class Message(models.Model):
+class Message(Base):
     """Model to handle user-to-user messaging."""
     sender = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='sent_messages')
     receiver = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='received_messages')
