@@ -53,7 +53,6 @@ class Users(AbstractUser, Base):
     first_name = models.CharField(max_length=100, blank=False)
     last_name = models.CharField(max_length=100, blank=False)
 
-    profile_image = models.ImageField(upload_to='profile_images/', null=True, blank=True)
     # group = models.ForeignKey(Groups, on_delete=models.SET_NULL, null=True, blank=True, related_name='members')
     group = models.ForeignKey("api.Groups", on_delete=models.SET_NULL, null=True, blank=True, related_name="user_groups")
 
@@ -77,9 +76,7 @@ class Users(AbstractUser, Base):
         return self.username
 class Locations(Base):
     """Model to store location details and associate it with a user."""
-    # user = models.OneToOneField(
-    #     Users, on_delete=models.CASCADE, related_name="location"
-    # )
+
     user = models.ForeignKey("api.Users", on_delete=models.CASCADE, related_name="user_location")
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
@@ -136,13 +133,14 @@ class Groups(Base):
 class Profile(Base):
     user = models.OneToOneField(Users, on_delete=models.CASCADE)
     bio = models.TextField(blank=True)
-    profileimg = models.ImageField(
+    profile_image = models.ImageField(
         upload_to="profile_images",
         default="profile_images/blank-profile-picture.png",
     )
     profession = models.CharField(max_length=100, blank=True)
     location = models.CharField(max_length=100, blank=True)
     verified = models.BooleanField(default=False)
+
 
 
     def __str__(self):

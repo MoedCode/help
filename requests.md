@@ -27,8 +27,8 @@ http://127.0.0.1:8000/api/register/
     "password": "Joh_M$25xo",
     "street": "123 Main St",
     "city": "New York",
-    "country": "USA",
-    "profile_image": "john_doee.jpg"
+    "country": "USA"
+
 }
 ```
 
@@ -49,8 +49,8 @@ http://127.0.0.1:8000/api/register/
     "password": "Joh_M$25xo",
     "street": "123 Main St",
     "city": "New York",
-    "country": "USA",
-    "profile_image": "john_doee.jpg"
+    "country": "USA"
+
 }
 ```
 
@@ -131,10 +131,18 @@ http://127.0.0.1:8000/api/groups/remove-user/
     "remove_username": "max_john_doee"
 }
 ```
+# update profile
+```json
 
+{
+    "bio":"any bio ",
+    "profession":"any Profession",
+    "location":"any Location"
+}
+```
 ---
 
-### **7. Test the Search Endpoint for Classes**
+<!-- ### **7. Test the Search Endpoint for Classes**
 Send a `GET` request to:
 ```http
 http://127.0.0.1:8000/api/classes/search/?query=Tech
@@ -145,4 +153,4 @@ X-CSRFToken: <the obtained CSRF token>
 Authorization: Token <your_auth_token>
 ```
 
-This request should return all `Classes` that match the search query `"Tech"`. Let me know if you need modifications! 🚀
+This request should return all `Classes` that match the search query `"Tech"`. Let me know if you need modifications! 🚀 -->

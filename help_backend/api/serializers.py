@@ -7,7 +7,7 @@ class UsersSerializerAll(serializers.ModelSerializer):
 class UsersSerializer(serializers.ModelSerializer):
     class Meta:
         model = Users
-        fields = ["username", "email", "first_name", "last_name", "profile_image", "id"]
+        fields = ["username", "email", "first_name", "last_name", "id"]
         # fields = "__all__"
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:

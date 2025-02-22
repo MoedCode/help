@@ -44,6 +44,7 @@ class Register(APIView):
         if password:
             user.set_password(password)  # 🔑 Hashes the password
 
+
         user.save()  # Now the password is securely stored
 
         # 🔹 Create the Profile instance for the user
@@ -115,8 +116,8 @@ class CreateGroup(APIView):
             return Response({"error": "Invalid username or password"}, status=S401)
 
         # Check if user is logged in
-        if not request.user.is_authenticated:
-            return Response({"error": "User must be logged in"}, status=S403)
+        # if not request.user.is_authenticated:
+        #     return Response({"error": "User must be logged in"}, status=S403)
 
         # Create new group
         group = Groups.objects.create(
@@ -329,15 +330,42 @@ class UserUpdate(APIView):
             user.save()
             logout(request)  # Log out the user after password change
             return Response({"message": "Password updated successfully. Please log in again."}, status=S200)
-
+        user.is_active = False
         user.save()
 
         # Serialize and return updated user data
         serializer = UsersSerializer(user)
         return Response({"message": "User data updated successfully.", "user": serializer.data}, status=S200)
 
-
 class ProfileUpdate(APIView):
+    """ Profile Update Endpoint Class """
+    permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access
+
+    def put(self, request):
+        is_valid, result = validate_profile_update(request.data)
+        if not is_valid:
+            return Response(result, status=S400)
+
+        profile = Profile.objects.filter(user=request.user).first()
+        if not profile:
+            try:
+                profile = Profile.objects.create(user=request.user)
+            except Exception as e:
+                return Response({"error": str(e)}, status=S500)
+
+        # Handle profile image upload
+        if 'profile_image' in request.FILES:
+            profile.profile_image = request.FILES['profileimg']
+
+        # Update other fields
+        for field, value in result.items():
+            setattr(profile, field, value)
+        profile.save()
+
+        serializer = ProfileSerializer(profile)
+        return Response(serializer.data, status=S200)
+
+class ProfileUpdate_(APIView):
     """ Pofile Update Endpoint Class"""
     permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access
     def put(self, request):
@@ -353,13 +381,15 @@ class ProfileUpdate(APIView):
                 profile = Profile.objects.create(user=request.user)
             except Exception as e:
                 return Response({"error":str(e)}, S500)
-
-
         for field, value in result.items():
             setattr(profile, field, value)
         profile.save()
         serializer = ProfileSerializer(profile).data
         return Response(serializer, S200)
+# class SetLocation(APIView):
+#     permission_classes = [IsAuthenticated]
+#     def post(self, request):
+
 
 """
 class Search(APIView):

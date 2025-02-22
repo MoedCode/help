@@ -66,7 +66,7 @@ def validate_profile_update(data):
     # Allowed keys and their expected types
     allowed_keys = {
         "bio": str,
-        "profileimg": str,  # Assuming it's a file path or URL
+        "profile_image": (str, bytes),  # Accept file path or binary image data
         "profession": str,
         "location": str,
         "verified": bool,
@@ -81,7 +81,7 @@ def validate_profile_update(data):
             if isinstance(value, allowed_keys[key]):
                 valid_data[key] = value
             else:
-                errors[key] = f"Expected {allowed_keys[key].__name__}, got {type(value).__name__}."
+                errors[key] = f"Expected {allowed_keys[key]}, got {type(value).__name__}."
         else:
             errors[key] = "Invalid field."
 
