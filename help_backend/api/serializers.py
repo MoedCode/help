@@ -14,6 +14,11 @@ class ProfileSerializer(serializers.ModelSerializer):
         model = Profile
 
         fields = "__all__"
+class LocationsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Locations
+
+        fields = "__all__"
 class GroupsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Groups

@@ -3,6 +3,9 @@ import re
 from datetime import date
 from django.core.exceptions import ValidationError
 from api.models import Users  # Import the Users model
+import pycountry
+from geopy.geocoders import Nominatim
+from rest_framework.exceptions import ValidationError
 
 def validate_user_data(request_data):
     """
@@ -90,3 +93,19 @@ def validate_profile_update(data):
         return False, errors
 
     return True, valid_data  # If everything is valid, return True with filtered data
+
+def validate_city_country(city, country):
+    """Validate that the city exists and belongs to the given country dynamically."""
+    geolocator = Nominatim(user_agent="geoapiExercises")
+
+    # Get country object
+    country_obj = pycountry.countries.get(name=country) or pycountry.countries.get(alpha_2=country)
+    if not country_obj:
+        raise ValidationError({"country": "Invalid country name or code."})
+
+    # Verify city existence
+    location = geolocator.geocode(f"{city}, {country_obj.name}")
+    if not location:
+        raise ValidationError({"city": f"{city} does not belong to {country_obj.name}."})
+
+    return True

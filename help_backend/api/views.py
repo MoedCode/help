@@ -339,7 +339,7 @@ class UserUpdate(APIView):
 
 class ProfileUpdate(APIView):
     """ Profile Update Endpoint Class """
-    # permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access
+    permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access
 
     def put(self, request):
         is_valid, result = validate_profile_update(request.data)
@@ -386,9 +386,33 @@ class profileUpdate_(APIView):
         profile.save()
         serializer = ProfileSerializer(profile).data
         return Response(serializer, S200)
-# class SetLocation(APIView):
-#     permission_classes = [IsAuthenticated]
-#     def post(self, request):
+class SetLocation(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        data = request.data
+
+        # Ensure all required fields exist
+        required_fields = ["city", "country", "latitude", "longitude"]
+        for field in required_fields:
+            if field not in data or not data[field]:
+                return Response({field: f"{field} is required and cannot be empty."}, S400)
+
+        city = data.get("city")
+        country = data.get("country")
+
+        # Validate city-country relationship
+        try:
+            validate_city_country(city, country)
+        except ValidationError as e:
+            return Response(e.detail, S400)
+
+        # Save the location instance
+        location = Locations.objects.create(user=user, **data)
+        serializer = LocationsSerializer(location)
+
+        return Response({"message": "Location saved successfully!", "data": serializer.data}, S201)
 
 
 """

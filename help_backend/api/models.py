@@ -172,12 +172,76 @@ class Message(Base):
     def __str__(self):
         return f"Message from {self.sender.username} to {self.receiver.username} at {self.timestamp}"
 
+class SubscriptionPackage(Base):
+    """Subscription package model for different subscription plans."""
+    name = models.CharField(max_length=255, unique=True)
+    description = models.TextField(blank=True, null=True)
+    price = models.DecimalField(max_digits=10, decimal_places=2)  # Subscription cost
+    duration_days = models.PositiveIntegerField()  # Duration in days (e.g., 30 for monthly, 365 for yearly)
+
+    created_by = models.ForeignKey(
+        "api.Users",  # String reference to avoid circular imports
+        on_delete=models.CASCADE,
+        related_name="created_packages",
+        limit_choices_to={'is_superuser': True},  # Ensures only superusers (admins) can create packages
+    )
+
+    def __str__(self):
+        return f"{self.name} - ${self.price} ({self.duration_days} days)"
+
+
+class UserSubscription(Base):
+    """User subscription model to track which users have which subscriptions."""
+    user = models.ForeignKey(
+        "api.Users",  # String reference to avoid circular imports
+        on_delete=models.CASCADE,
+        related_name="subscriptions"
+    )
+    package = models.ForeignKey(
+        "api.SubscriptionPackage",  # String reference to SubscriptionPackage
+        on_delete=models.CASCADE,
+        related_name="user_subscriptions"
+    )
+    start_date = models.DateTimeField(default=timezone.now)
+    end_date = models.DateTimeField()  # Expiry date based on package duration
+
+    def save(self, *args, **kwargs):
+        """Automatically calculate end date based on package duration before saving."""
+        if not self.end_date:
+            self.end_date = self.start_date + timezone.timedelta(days=self.package.duration_days)
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.user.username} subscribed to {self.package.name} until {self.end_date.strftime('%Y-%m-%d')}"
+
+class UserConnections(Base):
+    """Model to store user connections, including joined groups and trusted contacts."""
+    user = models.ForeignKey(
+        "api.Users",  # Reference to the user who owns these connections
+        on_delete=models.CASCADE,
+        related_name="connections"
+    )
+    group_name = models.CharField(max_length=255, blank=True, null=True)  # Name of the joined group
+    contact_name = models.CharField(max_length=255)  # Name of the trusted contact
+    phone_number = models.CharField(max_length=20, blank=True, null=True)  # Primary phone number
+    additional_phone_numbers = models.JSONField(blank=True, null=True)  # Store multiple phone numbers as JSON
+    email = models.EmailField(blank=True, null=True)  # Contact's email
+    address = models.TextField(blank=True, null=True)  # Optional address field
+    notes = models.TextField(blank=True, null=True)  # Additional notes for the contact
+
+    def __str__(self):
+        return f"{self.user.username}'s Contact: {self.contact_name} ({self.phone_number})"
+
+
 Classes = {
     "Users":Users,
     "Profile":Profile,
     "Locations":Locations,
     "HelpRequest":HelpRequest,
     "Message":Message,
+    "SubscriptionPackage":SubscriptionPackage,
+    "UserSubscription":UserSubscription,
+    "UserConnections":UserConnections,
 
 }
 classes = {
@@ -186,5 +250,8 @@ classes = {
     "locations":Locations,
     "helpRequest":HelpRequest,
     "message":Message,
+    "subscriptionPackage":SubscriptionPackage,
+    "userSubscription":UserSubscription,
+    "userConnections":UserConnections,
 
 }
