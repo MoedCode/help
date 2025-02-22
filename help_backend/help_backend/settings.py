@@ -49,10 +49,13 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    # 'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # added for update pofile from forms
+        "corsheaders.middleware.CorsMiddleware",  # Add this at the top
+    "django.middleware.common.CommonMiddleware",
 ]
 
 ROOT_URLCONF = 'help_backend.urls'
