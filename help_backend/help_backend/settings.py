@@ -54,7 +54,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     # added for update pofile from forms
-        "corsheaders.middleware.CorsMiddleware",  # Add this at the top
+    "corsheaders.middleware.CorsMiddleware",  # Add this at the top
     "django.middleware.common.CommonMiddleware",
 ]
 

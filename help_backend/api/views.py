@@ -339,7 +339,7 @@ class UserUpdate(APIView):
 
 class ProfileUpdate(APIView):
     """ Profile Update Endpoint Class """
-    permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access
+    # permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access
 
     def put(self, request):
         is_valid, result = validate_profile_update(request.data)
@@ -365,7 +365,7 @@ class ProfileUpdate(APIView):
         serializer = ProfileSerializer(profile)
         return Response(serializer.data, status=S200)
 
-class ProfileUpdate_(APIView):
+class profileUpdate_(APIView):
     """ Pofile Update Endpoint Class"""
     permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access
     def put(self, request):
