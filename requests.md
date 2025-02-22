@@ -123,6 +123,8 @@ Send a `POST` request to:
 ```http
 http://127.0.0.1:8000/api/groups/remove-user/
 ```
+**require login with group admin user**
+
 **Request Body:**
 ```json
 {
@@ -132,6 +134,8 @@ http://127.0.0.1:8000/api/groups/remove-user/
 }
 ```
 # update profile
+**requires login**
+ ## upload image file
 ```json
 
 {
@@ -139,6 +143,22 @@ http://127.0.0.1:8000/api/groups/remove-user/
     "profession":"any Profession",
     "location":"any Location"
 }
+
+
+```
+
+# set a location
+**requires login from user account**
+```json
+{
+    "city": "New York",
+    "country": "United States",
+    "latitude": 40.7128,
+    "longitude": -74.0060
+}
+
+
+
 ```
 ---
 

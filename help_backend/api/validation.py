@@ -6,6 +6,8 @@ from api.models import Users  # Import the Users model
 import pycountry
 from geopy.geocoders import Nominatim
 from rest_framework.exceptions import ValidationError
+import pycountry
+from geopy.geocoders import Nominatim
 
 def validate_user_data(request_data):
     """
@@ -94,18 +96,79 @@ def validate_profile_update(data):
 
     return True, valid_data  # If everything is valid, return True with filtered data
 
-def validate_city_country(city, country):
-    """Validate that the city exists and belongs to the given country dynamically."""
-    geolocator = Nominatim(user_agent="geoapiExercises")
 
-    # Get country object
-    country_obj = pycountry.countries.get(name=country) or pycountry.countries.get(alpha_2=country)
+
+import pycountry
+from geopy.geocoders import Nominatim
+from geopy.exc import GeocoderServiceError, GeocoderTimedOut, GeocoderQuotaExceeded
+
+def validate_location(data):
+    """
+    Validate that the location data contains all required fields,
+    ensures the city exists and belongs to the given country,
+    and checks for valid latitude and longitude values.
+
+    Returns:
+        (True, validated_data) if valid
+        (False, error_messages) if invalid
+    """
+    required_fields = ["city", "country", "latitude", "longitude"]
+    errors = {}
+
+    # Check if all required fields are present
+    for field in required_fields:
+        if field not in data or not data[field]:
+            errors[field] = f"{field} is required."
+
+    if errors:
+        return False, errors
+
+    city = data["city"].strip()
+    country = data["country"].strip()
+    latitude = data["latitude"]
+    longitude = data["longitude"]
+
+    # Validate latitude and longitude ranges
+    try:
+        latitude = float(latitude)
+        longitude = float(longitude)
+        if not (-90 <= latitude <= 90):
+            errors["latitude"] = "Latitude must be between -90 and 90."
+        if not (-180 <= longitude <= 180):
+            errors["longitude"] = "Longitude must be between -180 and 180."
+    except ValueError:
+        errors["latitude"] = "Latitude must be a valid number."
+        errors["longitude"] = "Longitude must be a valid number."
+
+    # Validate that the country exists (by name or ISO alpha-2)
+    country_obj = pycountry.countries.get(name=country) or pycountry.countries.get(alpha_2=country.upper())
     if not country_obj:
-        raise ValidationError({"country": "Invalid country name or code."})
+        errors["country"] = "Invalid country name or code."
 
-    # Verify city existence
-    location = geolocator.geocode(f"{city}, {country_obj.name}")
-    if not location:
-        raise ValidationError({"city": f"{city} does not belong to {country_obj.name}."})
+    if errors:
+        return False, errors
 
-    return True
+    # Validate that the city exists in the given country
+    geolocator = Nominatim(user_agent="your_unique_app_name", timeout=10)
+    try:
+        location = geolocator.geocode(f"{city}, {country_obj.name}", exactly_one=True)
+        if not location:
+            errors["city"] = f"Could not find {city} in {country_obj.name}."
+    except GeocoderQuotaExceeded:
+        errors["geocode"] = "Geocoder rate limit exceeded. Try again later."
+    except (GeocoderServiceError, GeocoderTimedOut):
+        errors["geocode"] = "Geolocation service unavailable or request timed out."
+
+    if errors:
+        return False, errors
+
+    # If all validations pass
+    validated_data = {
+        "city": city,
+        "country": country_obj.name,
+        "latitude": latitude,
+        "longitude": longitude
+    }
+    return True, validated_data
+
+

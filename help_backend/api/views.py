@@ -393,27 +393,20 @@ class SetLocation(APIView):
         user = request.user
         data = request.data
 
-        # Ensure all required fields exist
-        required_fields = ["city", "country", "latitude", "longitude"]
-        for field in required_fields:
-            if field not in data or not data[field]:
-                return Response({field: f"{field} is required and cannot be empty."}, S400)
+        # Validate location data
+        is_valid, result = validate_location(data)
 
-        city = data.get("city")
-        country = data.get("country")
-
-        # Validate city-country relationship
-        try:
-            validate_city_country(city, country)
-        except ValidationError as e:
-            return Response(e.detail, S400)
+        if not is_valid:
+            return Response({"errors": result}, S400)
 
         # Save the location instance
-        location = Locations.objects.create(user=user, **data)
+        location = Locations.objects.create(user=user, **result)
         serializer = LocationsSerializer(location)
 
-        return Response({"message": "Location saved successfully!", "data": serializer.data}, S201)
-
+        return Response(
+            {"message": "Location saved successfully!", "data": serializer.data},
+            S201
+        )
 
 """
 class Search(APIView):
