@@ -25,8 +25,8 @@ urlpatterns = [
                         # Location URL's
     path("set_location/", views.SetLocations.as_view(), name="set_location"),
     path("set_location/<str:id>/", views.SetLocations.as_view(), name="set_location_detail"),
-    path("get_locations/", views.SetLocations.get.as_view(), name="get_locations"),
-    path("get_location/", views.SetLocations.as_view(), name="get_locations"),
+    path("get_locations/", views.SetLocations.as_view(), name="get_locations"),
+    path("get_location/", views.RecentLcation.as_view(), name="get_locations"),
     path("update_location/", views.SetLocations.as_view(), name="update_location"),
     path("delete_location/<str:id>/", views.SetLocations.as_view(), name="delete_location"),
     path("delete_location/", views.SetLocations.as_view(), name="delete_location"),

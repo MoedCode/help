@@ -83,6 +83,16 @@ class Locations(Base):
     address = models.CharField(max_length=255, null=True, blank=True)
     city = models.CharField(max_length=100, null=True, blank=True)
     country = models.CharField(max_length=100, null=True, blank=True)
+    @classmethod
+    def recent(cls, user_id, date_attr_name="updated_date"):
+        """
+        Get the most recent location for the given user_id based on updated_at timestamp.
+        """
+        if "updated" in date_attr_name:
+            return cls.objects.filter(user_id=user_id).order_by("-updated_date").first()
+
+        if "created" in date_attr_name:
+            return cls.objects.filter(user_id=user_id).order_by("-created_date").first()
 
     def __str__(self):
         return f"Locations of {self.user.username} - {self.address or f'{self.latitude}, {self.longitude}'}"

@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from api.models import *
+
 class UsersSerializerAll(serializers.ModelSerializer):
     class Meta:
         model = Users
@@ -9,11 +10,15 @@ class UsersSerializer(serializers.ModelSerializer):
         model = Users
         fields = ["username", "email", "first_name", "last_name", "id"]
         # fields = "__all__"
+
+
+
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
 
         fields = "__all__"
+
 class LocationsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Locations
@@ -24,9 +29,15 @@ class GroupsSerializer(serializers.ModelSerializer):
         model = Groups
 
         fields = "__all__"
-class LocationsSerializer(serializers.ModelSerializer):
+
+class SubscriptionPackagesSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Locations
+        model = SubscriptionPackage
+
+        fields = "__all__"
+class UserSubscriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserSubscription
 
         fields = "__all__"
 class MessageSerializer(serializers.ModelSerializer):
@@ -41,9 +52,13 @@ class HelpRequestSerializer(serializers.ModelSerializer):
         fields = "__all__"
 classesSerializers = {
     "users":UsersSerializer,
+    "users|_all":UsersSerializerAll,
     "profile":ProfileSerializer,
     "locations":LocationsSerializer,
-    "helpRequest":HelpRequestSerializer,
+    "groups":GroupsSerializer,
+    "help_request":HelpRequestSerializer,
     "message":MessageSerializer,
+    "Subscription_packages":SubscriptionPackagesSerializer,
+    "user_Subscription":UserSubscriptionSerializer,
 
 }

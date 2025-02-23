@@ -95,6 +95,16 @@ class SetLocations(APIView):
         locations = Locations.objects.filter(user=user)
         serializer = LocationsSerializer(locations, many=True)
         return Response({"locations": serializer.data}, status=status.HTTP_200_OK)
+class RecentLcation(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        user_id = request.user.id
+        try:
+            recent_location = Locations.recent(user_id=user_id)
+            serializer = LocationsSerializer(recent_location).data
+            return Response(serializer, S200)
+        except Exception as e:
+            return Response({"error":str(e)}, S500)
 
 class DeleteAllLocations(APIView):
     """API endpoint to delete all locations for an authenticated user."""
