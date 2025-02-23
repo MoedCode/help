@@ -247,21 +247,21 @@ Classes = {
     "Users":Users,
     "Profile":Profile,
     "Locations":Locations,
+    "Groups":Groups,
     "HelpRequest":HelpRequest,
     "Message":Message,
     "SubscriptionPackage":SubscriptionPackage,
     "UserSubscription":UserSubscription,
     "UserConnections":UserConnections,
-
 }
 classes = {
     "users":Users,
     "profile":Profile,
     "locations":Locations,
+    "groups":Groups,
     "helpRequest":HelpRequest,
     "message":Message,
-    "subscriptionPackage":SubscriptionPackage,
-    "userSubscription":UserSubscription,
-    "userConnections":UserConnections,
-
+    "subscription_package":SubscriptionPackage,
+    "user_subscription":UserSubscription,
+    "user_connections":UserConnections,
 }

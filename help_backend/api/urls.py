@@ -2,7 +2,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path("hi", views.Hi.as_view(), name="hi"),
+    path("", views.Hi.as_view(), name="about"),
     # path("csrf", views.getCSRFCookie.as_view(), name="csrf"),
                         #Users URL's
     path("register/", views.Register.as_view(), name="resgister"),
@@ -31,7 +31,7 @@ urlpatterns = [
     path("delete_location/<str:id>/", views.SetLocations.as_view(), name="delete_location"),
     path("delete_location/", views.SetLocations.as_view(), name="delete_location"),
     path("delete_all_locations/", views.DeleteAllLocations.as_view(), name="delete_all_locations"),
-
+    path("subscription/", views.SubscriptionPackageView.as_view(), name="subscription"),
                         # echo request
     path("echo_request/", views.EchoRequestView.as_view(), name="echo_request"),
 ]

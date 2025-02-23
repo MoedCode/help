@@ -34,7 +34,7 @@ class SubscriptionPackagesSerializer(serializers.ModelSerializer):
     class Meta:
         model = SubscriptionPackage
 
-        fields = "__all__"
+        fields = ["name","description","price","duration_days"]
 class UserSubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserSubscription
@@ -52,7 +52,7 @@ class HelpRequestSerializer(serializers.ModelSerializer):
         fields = "__all__"
 classesSerializers = {
     "users":UsersSerializer,
-    "users|_all":UsersSerializerAll,
+    "users_all":UsersSerializerAll,
     "profile":ProfileSerializer,
     "locations":LocationsSerializer,
     "groups":GroupsSerializer,
