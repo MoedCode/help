@@ -153,6 +153,7 @@ http://127.0.0.1:8000/api/groups/remove-user/
 {
     "city": "New York",
     "country": "United States",
+    "address":"comp y ,  strate x..dep number 12",
     "latitude": 40.7128,
     "longitude": -74.0060
 }

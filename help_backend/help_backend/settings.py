@@ -148,3 +148,5 @@ AUTH_USER_MODEL = "api.Users"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # print(f"\n\n MEDIA_ROOT{ MEDIA_ROOT}")
 MEDIA_URL = "/media/"
+
+

@@ -1,403 +1,28 @@
-
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from django.contrib.auth import authenticate, login,  logout
-from django.middleware.csrf import get_token
-from django.utils.decorators import method_decorator
-from django.views.decorators.csrf import ensure_csrf_cookie
-from rest_framework.permissions import IsAuthenticated
-from rest_framework import permissions, generics
-from .models import *
-from api.__init__ import *
-from .validation import *
-from .serializers import *
-from django.contrib.auth.models import AnonymousUser
-import json
-from django.core.exceptions import FieldError
-ensure_csrf = method_decorator(ensure_csrf_cookie)
-# Create your views here.
-class Hi(APIView):
-
-    def get(self, request):
-        return Response(
-            {"mmessage":"its kaky"} , status=S200
-        )
-class getCSRFCookie(APIView):
-    permission_classes = []
-    authentication_classes = []
-
-    @ensure_csrf
-    def get(self, request):
-        return Response({"csrfToken": get_token(request)})
-
-class Register(APIView):
-    def post(self, request):
-        clean_data = validate_user_data(request.data)
-
-        # Extract password before passing to model
-        password = clean_data.pop("password", None)
-
-        # Create user instance (without password)
-        user = Users(**clean_data)
-
-        # Hash the password properly
-        if password:
-            user.set_password(password)  # 🔑 Hashes the password
+from .main_views import *
 
 
-        user.save()  # Now the password is securely stored
-
-        # 🔹 Create the Profile instance for the user
-        Profile.objects.create(user=user)
-
-        # Serialize the user object using UsersSerializer
-        serializer = UsersSerializer(user, context={"request": request})
-
-        # Write serialized data to test.json for debugging
-        with open("test.json", 'w') as jf:
-            json.dump(serializer.data, jf, indent=4)
-
-        return Response(serializer.data, status=S200)
-
-class Login(APIView):
-    def post(self, request):
-        username = request.data.get("username")
-        password = request.data.get("password")
-
-        # Check if both fields are provided
-        if not username or not password:
-            return Response({"error": "Username and password are required"}, status=S400)
-
-        # Authenticate user
-        user = authenticate(username=username, password=password)
-
-        if user:
-            login(request, user)  # Start session
-
-            # Get CSRF token
-            csrf_token = get_token(request)
-
-            # Create response
-            response = Response(
-                {"message": "Login successful", "user": {"username": user.username}},
-                status=S200
-            )
-
-            # Set session ID and CSRF token in cookies
-            response.set_cookie(key="sessionid", value=request.session.session_key, httponly=True, secure=False, samesite="Lax")
-            response.set_cookie(key="csrftoken", value=csrf_token, secure=False, samesite="Lax")
-
-            return response
-        else:
-            return Response({"error": "Invalid credentials"}, status=S401)
-
-class Logout(APIView):
-    permission_classes = (permissions.AllowAny,)
-    authentication_classes = ()
-
-    def post(self, request):
-        logout(request)
-        return Response(status=S200)
-
-class CreateGroup(APIView):
-    permission_classes = [IsAuthenticated]
-
-class CreateGroup(APIView):
-    def post(self, request):
-        username = request.data.get("username")
-        password = request.data.get("password")
-        group_name = request.data.get("group_name")
-        group_description = request.data.get("group_description")
-
-        # Authenticate user
-        user = authenticate(username=username, password=password)
-
-        if user is None or isinstance(user, AnonymousUser):
-            return Response({"error": "Invalid username or password"}, status=S401)
-
-        # Check if user is logged in
-        # if not request.user.is_authenticated:
-        #     return Response({"error": "User must be logged in"}, status=S403)
-
-        # Create new group
-        group = Groups.objects.create(
-            name=group_name,
-            description=group_description,
-            admin_user=user  # Assuming the Group model has an 'admin' field
-        )
-        group.members.add(user)  # Add user as a member
-        return Response({"message": "Group created successfully", "group_id": group.id}, status=S201)
-
-class ProfileView(APIView):
+class SetLocations(APIView):
+    """
+    API endpoint for setting, updating, retrieving, and deleting a user's locations.
+    Requires authentication.
+    """
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        try:
-            username = request.data.get("username")
-            user = Users.objects.filter(username=username).first()
-            profile = Profile.objects.filter(user=user).first()
-            serialized_profile = ProfileSerializer(profile, context={"request": request})
-            return Response(
-                serialized_profile, status=S200
-            )
-        except Exception as e:
-            return Response(
-                {"error":str(e)}, status=S500
-            )
-
-
-class AddUserToGroup(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        group_identifier = request.data.get("group_name") or request.data.get("group_id")
-        admin_username = request.data.get("admin_username")
-        add_username = request.data.get("add_username")
-
-        # Validate input
-        if not all([group_identifier, admin_username, add_username]):
-            return Response({"error": "Missing required fields"}, status=S400)
-
-        # Check if admin user exists
-        admin_user = Users.objects.filter(username=admin_username).first()
-        if not admin_user or not admin_user.is_authenticated:
-            return Response({"error": "Invalid or unauthenticated admin user"}, status=S401)
-
-        # Find the group by name or ID
-        group = None
-        if isinstance(group_identifier, int):  # If group_id is given
-            group = Groups.objects.filter(id=group_identifier).first()
-        else:  # If group_name is given
-            group = Groups.objects.filter(name=group_identifier).first()
-
-        if not group:
-            return Response({"error": "Group not found"}, status=S404)
-
-        # Check if admin user is the group's admin
-        if group.admin_user != admin_user:
-            return Response({"error": "Only the group admin can add users"}, status=S403)
-
-        # Check if the user to be added exists
-        add_user = Users.objects.filter(username=add_username).first()
-        if not add_user:
-            return Response({"error": "User to be added not found"}, status=S404)
-
-        # Add user to group
-        group.members.add(add_user)
-        return Response({"message": f"{add_username} added to {group.name} successfully"}, status=S200)
-class RemoveUserFromGroup(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        print(f"\n\nrequest header\n\n")
-        group_identifier = request.data.get("group_name") or request.data.get("group_id")
-        admin_username = request.data.get("admin_username")
-        remove_username = request.data.get("remove_username")
-
-        # Validate input
-        if not all([group_identifier, admin_username, remove_username]):
-            return Response({"error": "Missing required fields"}, status=S400)
-
-        # Check if admin user exists and is authenticated
-        admin_user = Users.objects.filter(username=admin_username).first()
-        if not admin_user or not admin_user.is_authenticated:
-            return Response({"error": "Invalid or unauthenticated admin user"}, status=S401)
-
-        # Find the group by name or ID
-        group = None
-        if isinstance(group_identifier, int):  # If group_id is given
-            group = Groups.objects.filter(id=group_identifier).first()
-        else:  # If group_name is given
-            group = Groups.objects.filter(name=group_identifier).first()
-
-        if not group:
-            return Response({"error": "Group not found"}, status=S404)
-
-        # Check if admin user is the group's admin
-        if group.admin_user != admin_user:
-            return Response({"error": "Only the group admin can remove users"}, status=S403)
-
-        # Check if the user to be removed exists
-        remove_user = Users.objects.filter(username=remove_username).first()
-        if not remove_user:
-            return Response({"error": "User to be removed not found"}, status=S404)
-
-        # Check if the user is in the group
-        if remove_user not in group.members.all():
-            return Response({"error": "User is not a member of this group"}, status=S400)
-
-        # Remove user from group
-        group.members.remove(remove_user)
-        return Response({"message": f"{remove_username} removed from {group.name} successfully"}, status=S200)
-class DeleteUser(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        username = request.data.get("username")
-        password = request.data.get("password")
-
-        # Validate input
-        if not username or not password:
-            return Response({"error": "Username and password are required"}, status=S400)
-
-        # Authenticate user
-        user = authenticate(username=username, password=password)
-        if not user:
-            return Response({"error": "Invalid credentials"}, status=S401)
-
-        # Ensure the user is deleting their own account
-        if request.user != user:
-            return Response({"error": "login  required"}, status=S403)
-
-        # Log out the user if they are authenticated
-        logout(request)
-
-        # Delete user account
-        user.delete()
-
-        return Response({"message": "Account deleted successfully"}, status=S200)
-class GetUserData(APIView):
-    permission_classes = [IsAuthenticated]  # Ensure authentication is required
-
-    def post(self, request):
-        # Extract username and password from request body
-        username = request.data.get("username")
-        password = request.data.get("password")
-
-        if not username or not password:
-            return Response({"error": "Username and password are required."}, status=400)
-
-        # Authenticate the user
-        user = authenticate(username=username, password=password)
-
-        if user is None:
-            return Response({"error": "Invalid credentials."}, status=401)
-
-        # Ensure the authenticated user matches the logged-in user
-        if request.user != user:
-            return Response({"error": "Unauthorized access."}, status=403)
-
-        # Fetch user and profile data
-        user_data = UsersSerializer(user).data
-        profile = Profile.objects.filter(user=user).first()
-        profile_data = ProfileSerializer(profile).data if profile else {}
-
-        return Response({
-            "user": user_data,
-            "profile": profile_data
-        })
-class UserUpdate(APIView):
-    permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access
-
-    def put(self, request):
-        # Extract username, password, and update_data from request body
-        username = request.data.get("username")
-        password = request.data.get("password")
-        update_data = request.data.get("update_data", {})
-
-        if not username or not password:
-            return Response({"error": "Username and password are required."}, status=S400)
-
-        if not update_data:
-            return Response({"error": "No update data provided."}, status=S400)
-
-        # Authenticate the user
-        user = authenticate(username=username, password=password)
-
-        if user is None:
-            return Response({"error": "Invalid credentials."}, status=S401)
-
-        # Ensure the authenticated user matches the logged-in user
-        if request.user != user:
-            return Response({"error": "Unauthorized access."}, status=S403)
-
-        try:
-            # Validate the update data
-            cleaned_data = validate_user_data(update_data)
-        except ValidationError as e:
-            return Response({"error": e.detail}, status=S400)
-
-        # Check if password is being updated
-        new_password = cleaned_data.pop("password", None)
-
-        # Update user fields
-        for field, value in cleaned_data.items():
-            setattr(user, field, value)
-
-        # Handle password update separately
-        if new_password:
-            user.set_password(new_password)
-            user.save()
-            logout(request)  # Log out the user after password change
-            return Response({"message": "Password updated successfully. Please log in again."}, status=S200)
-        user.is_active = False
-        user.save()
-
-        # Serialize and return updated user data
-        serializer = UsersSerializer(user)
-        return Response({"message": "User data updated successfully.", "user": serializer.data}, status=S200)
-
-class ProfileUpdate(APIView):
-    """ Profile Update Endpoint Class """
-    permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access
-
-    def put(self, request):
-        is_valid, result = validate_profile_update(request.data)
-        if not is_valid:
-            return Response(result, status=S400)
-
-        profile = Profile.objects.filter(user=request.user).first()
-        if not profile:
-            try:
-                profile = Profile.objects.create(user=request.user)
-            except Exception as e:
-                return Response({"error": str(e)}, status=S500)
-
-        # Handle profile image upload
-        if 'profile_image' in request.FILES:
-            profile.profile_image = request.FILES['profileimg']
-
-        # Update other fields
-        for field, value in result.items():
-            setattr(profile, field, value)
-        profile.save()
-
-        serializer = ProfileSerializer(profile)
-        return Response(serializer.data, status=S200)
-
-class profileUpdate_(APIView):
-    """ Pofile Update Endpoint Class"""
-    permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access
-    def put(self, request):
-        is_valid , result = validate_profile_update(request.data)
-        if not is_valid:
-            return Response(result, S400)
-        # if request.user.is_auth:
-        #     return Response({"error": "Unauthorized access."}, status=S403)
-
-        profile = Profile.objects.filter(user=request.user).first()
-        if not profile:
-            try:
-                profile = Profile.objects.create(user=request.user)
-            except Exception as e:
-                return Response({"error":str(e)}, S500)
-        for field, value in result.items():
-            setattr(profile, field, value)
-        profile.save()
-        serializer = ProfileSerializer(profile).data
-        return Response(serializer, S200)
-class SetLocation(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
+        """Create a new location for the authenticated user."""
         user = request.user
         data = request.data
 
+        # Ensure required fields are present
+        required_fields = {"city", "country", "latitude", "longitude"}
+        if not required_fields.issubset(data.keys()):
+            return Response({"error": f"Missing required fields: {required_fields - data.keys()}"},
+                            status=status.HTTP_400_BAD_REQUEST)
+
         # Validate location data
         is_valid, result = validate_location(data)
-
         if not is_valid:
-            return Response({"errors": result}, S400)
+            return Response({"errors": result}, status=status.HTTP_400_BAD_REQUEST)
 
         # Save the location instance
         location = Locations.objects.create(user=user, **result)
@@ -405,127 +30,211 @@ class SetLocation(APIView):
 
         return Response(
             {"message": "Location saved successfully!", "data": serializer.data},
-            S201
+            status=status.HTTP_201_CREATED
         )
 
-"""
-class Search(APIView):
+    def put(self, request):
+        """Update an existing location for the authenticated user."""
+        user = request.user
+        data = request.data
+
+        location_id = data.get("id")
+        if not location_id:
+            return Response({"error": "Location ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            location = Locations.objects.get(id=location_id, user=user)
+        except Locations.DoesNotExist:
+            return Response({"error": "Location not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Validate updated location data
+        is_valid, result = validate_location(data)
+        if not is_valid:
+            return Response({"errors": result}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Update location instance
+        for key, value in result.items():
+            setattr(location, key, value)
+        location.save()
+
+        serializer = LocationsSerializer(location)
+        return Response(
+            {"message": "Location updated successfully!", "data": serializer.data},
+            status=status.HTTP_200_OK
+        )
+
+    def delete(self, request, id=None):
+        """Delete a specific location by ID (from URL or request data)."""
+        user = request.user
+        location_id = id or request.data.get("id")
+
+        if not location_id:
+            return Response({"error": "Location ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            location = Locations.objects.get(id=location_id, user=user)
+            location.delete()
+            return Response({"message": "Location deleted successfully"}, status=status.HTTP_200_OK)
+        except Locations.DoesNotExist:
+            return Response({"error": "Location not found"}, status=status.HTTP_404_NOT_FOUND)
+
+    def get(self, request, id=None):
+        """Retrieve all locations or a specific one by ID."""
+        user = request.user
+        location_id = id or request.query_params.get("id")
+
+        if location_id:
+            try:
+                location = Locations.objects.get(id=location_id, user=user)
+                serializer = LocationsSerializer(location)
+                return Response({"location": serializer.data}, status=status.HTTP_200_OK)
+            except Locations.DoesNotExist:
+                return Response({"error": "Location not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # If no ID is provided, return all locations
+        locations = Locations.objects.filter(user=user)
+        serializer = LocationsSerializer(locations, many=True)
+        return Response({"locations": serializer.data}, status=status.HTTP_200_OK)
+
+class DeleteAllLocations(APIView):
+    """API endpoint to delete all locations for an authenticated user."""
     permission_classes = [IsAuthenticated]
-    def post(self, request):
-        # try:
-        category = request.data.get("category")
-        key = request.data.get("key")
-        value = request.data.get("value")
 
-        category = category.lower()
-        query = {key:value}
+    def delete(self, request):
+        user = request.user
+        deleted_count, _ = Locations.objects.filter(user=user).delete()
+        return Response({"message": f"Deleted {deleted_count} locations"}, status=status.HTTP_200_OK)
 
-        if category not in classes.keys():
-            return Response({"errror":f"category {category} is not exxist "}, S404)
-        if category in ["user", "users"]:
-            user = Users.objects.filter(**query).first()
-            if not user:
-                return Response({"error":f"cant find user {value}"}, status=S404)
-            if request.user != user:
-                return Response({"error": "not authorized"}, status=S401)
-            serial_user = UsersSerializer(user, context={"request": request}).data
-            print(f"\n\n\n {serial_user} \n\n\n")
-
-            return Response(serial_user, status=S200)
-        # try:
-        Class = classes[category]
-        ClassSerializor = classesSerializers[category]
-        queryObjt = Class.objects.filter(**query).first()
-        serializedObject = ClassSerializor(queryObjt, context={"request":request})
-        return Response(serializedObject, S200)
-        # except Exception as e:
-            # return Response({"error":str(e)})
-        # except Exception as e:
-        #     return Response({"error":str(e)}, S400)
-"""
-
-'''
-class Search(APIView):
+class SubscriptionPackageView(APIView):
+    """
+    API endpoint for creating, updating, and deleting subscription packages.
+    Requires an application admin (superuser) to be logged in
+    and to provide a valid admin username & password.
+    """
     permission_classes = [IsAuthenticated]
 
+    def authenticate_admin(self, request):
+        """Helper function to authenticate an admin user."""
+        admin_username = request.data.get("admin_username")
+        admin_password = request.data.get("admin_password")
+        admin_user = authenticate(username=admin_username, password=admin_password)
+
+        if not admin_user or not admin_user.is_superuser:
+            return None
+
+        return admin_user
+
     def post(self, request):
-        category = request.data.get("category", "").lower()
-        key = request.data.get("key")
-        value = request.data.get("value")
+        """Create a new subscription package (Only for superusers)."""
+        admin_user = self.authenticate_admin(request)
+        if not admin_user:
+            return Response(
+                {"error": "Invalid admin credentials or insufficient permissions"},
+                status=status.HTTP_403_FORBIDDEN
+            )
 
-        if not category or not key or value is None:
-            return Response({"error": "Missing required fields (category, key, or value)."}, S400)
+        serializer = SubscriptionPackageSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(created_by=admin_user)
+            return Response(
+                {"message": "Subscription package created successfully", "data": serializer.data},
+                status=status.HTTP_201_CREATED
+            )
 
-        search_methods = {
-            "user": self.search_user,
-            "users": self.search_user,
-            "profile": self.search_profile,
-            "profiles": self.search_profile,
-            "group": self.search_group,
-            "groups": self.search_group,
-            "message": self.search_message,
-            "messages": self.search_message,
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request):
+        """Update an existing subscription package (Only for superusers)."""
+        admin_user = self.authenticate_admin(request)
+        if not admin_user:
+            return Response(
+                {"error": "Invalid admin credentials or insufficient permissions"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        package_id = request.data.get("id")
+        if not package_id:
+            return Response({"error": "Subscription package ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            package = SubscriptionPackage.objects.get(id=package_id)
+        except SubscriptionPackage.DoesNotExist:
+            return Response({"error": "Subscription package not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = SubscriptionPackageSerializer(package, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"message": "Subscription package updated successfully", "data": serializer.data},
+                status=status.HTTP_200_OK
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request):
+        """Delete a subscription package (Only for superusers)."""
+        admin_user = self.authenticate_admin(request)
+        if not admin_user:
+            return Response(
+                {"error": "Invalid admin credentials or insufficient permissions"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        package_id = request.data.get("id")
+        if not package_id:
+            return Response({"error": "Subscription package ID is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            package = SubscriptionPackage.objects.get(id=package_id)
+            package.delete()
+            return Response({"message": "Subscription package deleted successfully"}, status=status.HTTP_200_OK)
+        except SubscriptionPackage.DoesNotExist:
+            return Response({"error": "Subscription package not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+
+
+from rest_framework.response import Response
+from rest_framework.views import APIView
+import json
+
+class EchoRequestView(APIView):
+    """An endpoint that returns the full request details and saves them to a file."""
+
+    def handle_request(self, request):
+        """Handles any request type and logs all details."""
+
+        # Extract request headers
+        headers = {key: value for key, value in request.headers.items()}
+
+        # Extract request body safely
+        try:
+            body = request.body.decode('utf-8').strip()
+            json_body = json.loads(body) if body else {}
+        except json.JSONDecodeError:
+            json_body = {"error": "Invalid JSON"}
+
+        # Build full request data
+        request_data = {
+            "method": request.method,
+            "path": request.get_full_path(),
+            "headers": headers,
+            "query_params": request.query_params.dict(),  # Query string params
+            "body": json_body,
+            "user": str(request.user) if request.user.is_authenticated else "Anonymous",
+            "user_agent": headers.get("User-Agent", "Unknown"),
         }
 
-        if category not in search_methods:
-            return Response({"error": f"Category '{category}' does not exist."}, S404)
+        # Save request details to a JSON file
+        with open("test.json", 'w') as log_file:
+            json.dump(request_data, log_file, indent=4)
 
-        return search_methods[category](request, key, value)
+        return Response(request_data)
 
-    def search_user(self, request, key, value):
-        """Search for a user, ensuring the requester can only access their own data."""
-        try:
-            user = Users.objects.filter(**{key: value}).first()
-            if not user:
-                return Response({"error": f"User '{value}' not found."}, S404)
-
-            if request.user != user:
-                return Response({"error": "Not authorized to view this user."}, S403)
-
-            serialized_user = UsersSerializer(user, context={"request": request}).data
-            return Response(serialized_user, S200)
-        except FieldError:
-            return Response({"error": f"Invalid search key '{key}' for Users."}, S400)
-
-    def search_profile(self, request, key, value):
-        """Search for a profile linked to the requesting user."""
-        try:
-            profile = Profile.objects.filter(user=request.user, **{key: value}).first()
-            if not profile:
-                return Response({"error": f"Profile '{value}' not found."}, S404)
-
-            serialized_profile = ProfileSerializer(profile, context={"request": request}).data
-            return Response(serialized_profile, S200)
-        except FieldError:
-            return Response({"error": f"Invalid search key '{key}' for Profile."}, S400)
-
-    def search_group(self, request, key, value):
-        """Search for a group (users can search for groups they belong to)."""
-        try:
-            group = Groups.objects.filter(members=request.user, **{key: value}).first()
-            if not group:
-                return Response({"error": f"Group '{value}' not found or you are not a member."}, S404)
-
-            serialized_group = GroupsSerializer(group, context={"request": request}).data
-            return Response(serialized_group, S200)
-        except FieldError:
-            return Response({"error": f"Invalid search key '{key}' for Group."}, S400)
-
-    def search_message(self, request, key, value):
-        """Search for messages where the requester is the sender or receiver."""
-        try:
-            message = Message.objects.filter(
-                sender=request.user, **{key: value}
-            ).first() or Message.objects.filter(
-                receiver=request.user, **{key: value}
-            ).first()
-
-            if not message:
-                return Response({"error": f"Message '{value}' not found."}, S404)
-
-            serialized_message = MessageSerializer(message, context={"request": request}).data
-            return Response(serialized_message, S200)
-        except FieldError:
-            return Response({"error": f"Invalid search key '{key}' for Message."}, S400)
-
-'''
+    # Allow all HTTP methods
+    def get(self, request): return self.handle_request(request)
+    def post(self, request): return self.handle_request(request)
+    def put(self, request): return self.handle_request(request)
+    def patch(self, request): return self.handle_request(request)
+    def delete(self, request): return self.handle_request(request)

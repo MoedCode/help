@@ -112,7 +112,7 @@ def validate_location(data):
         (True, validated_data) if valid
         (False, error_messages) if invalid
     """
-    required_fields = ["city", "country", "latitude", "longitude"]
+    required_fields = ["city", "country", "latitude", "longitude", "address"]
     errors = {}
 
     # Check if all required fields are present
@@ -127,7 +127,7 @@ def validate_location(data):
     country = data["country"].strip()
     latitude = data["latitude"]
     longitude = data["longitude"]
-
+    address = data["address"].strip()
     # Validate latitude and longitude ranges
     try:
         latitude = float(latitude)
@@ -167,7 +167,8 @@ def validate_location(data):
         "city": city,
         "country": country_obj.name,
         "latitude": latitude,
-        "longitude": longitude
+        "longitude": longitude,
+        "address": address
     }
     return True, validated_data
 
