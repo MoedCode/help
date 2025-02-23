@@ -96,6 +96,7 @@ class Locations(Base):
 
     def __str__(self):
         return f"Locations of {self.user.username} - {self.address or f'{self.latitude}, {self.longitude}'}"
+
 class Groups(Base):
     """Groups that users can belong to."""
     name = models.CharField(max_length=255, unique=True)

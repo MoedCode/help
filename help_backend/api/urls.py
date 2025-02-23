@@ -3,7 +3,7 @@ from . import views
 
 urlpatterns = [
     path("", views.Hi.as_view(), name="about"),
-    # path("csrf", views.getCSRFCookie.as_view(), name="csrf"),
+    path("csrf", views.getCSRFCookie.as_view(), name="csrf"),
                         #Users URL's
     path("register/", views.Register.as_view(), name="resgister"),
     path("delete_user/", views.DeleteUser.as_view(), name="delete_user"),
@@ -18,6 +18,9 @@ urlpatterns = [
     path("profile_update/", views.ProfileUpdate.as_view(), name="profile_update"),
 
                         #Groups URL's
+    # path("user_members/<str:group_ID>", views.GroupMembersData.as_view(), name="user_members"),
+    path("group_members/", views.GroupMembersData.as_view(), name="group_members"),
+    path("user_groups/", views.GetUserGroups.as_view(), name="user_groups"),
     path("create_group/", views.CreateGroup.as_view(), name="create_group"),
     path("add_user_to_group/", views.AddUserToGroup.as_view(), name="add_user_to_group"),
     path("remove_user_from_group/", views.RemoveUserFromGroup.as_view(), name="remove_user_from_group"),

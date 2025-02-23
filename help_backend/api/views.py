@@ -1,7 +1,7 @@
-from .views_users_management import *
-
-from .views_locations import *
-from .views_subscriptions import*
+from api.views_users_management import *
+from api.views_groups import *
+from api.views_locations import *
+from api.views_subscriptions import*
 
 
 class EchoRequestView(APIView):
