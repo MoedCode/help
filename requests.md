@@ -91,18 +91,30 @@ Send a `POST` request to:
 http://127.0.0.1:8000/api/groups/create/
 ```
 **Request Body:**
+*Group1*
 ```json
 {
     "username": "john_doee",
     "password": "Joh_M$25xo",
     "group_name": "Tech Enthusiasts",
+    "name_in_group":"john",
     "group_description": "A group for people interested in technology."
 }
 ```
+*Group2*
+```json
+{
+    "username": "john_doee",
+    "password": "Joh_M$25xo",
+    "group_name": "__Tech_Enthusiasts__",
+    "contact_name":"john",
+    "group_description": "A group for people interested in technology."
+}
 
+```
 ---
 
-### **5. Add User to Group**
+### 5. Add User to Group
 Send a `POST` request to:
 ```http
 http://127.0.0.1:8000/api/groups/add-user/
@@ -112,6 +124,16 @@ http://127.0.0.1:8000/api/groups/add-user/
 {
     "group_name": "Tech Enthusiasts",
     "admin_username": "john_doee",
+    "contact_name":"myFuckenSon",
+    "add_username": "max_john_doee"
+}
+```
+ add user to group2
+```json
+{
+    "group_name": "__Tech_Enthusiasts__",
+    "admin_username": "john_doee",
+    "contact_name":"myFuckenSon",
     "add_username": "max_john_doee"
 }
 ```

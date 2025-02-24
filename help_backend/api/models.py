@@ -97,6 +97,7 @@ class Locations(Base):
     def __str__(self):
         return f"Locations of {self.user.username} - {self.address or f'{self.latitude}, {self.longitude}'}"
 
+
 class Groups(Base):
     """Groups that users can belong to."""
     name = models.CharField(max_length=255, unique=True)
@@ -139,6 +140,36 @@ class Groups(Base):
 
     def __str__(self):
         return f"{self.name} (Admin: {self.admin_user.username})"
+class GroupContact(models.Model):
+    """Tracks a user's membership in a group with a custom nickname."""
+
+    user = models.ForeignKey(
+        "api.Users",
+        on_delete=models.SET_NULL,  # Set to NULL instead of deleting the GroupMember instance
+        null=True,
+        blank=True,
+        related_name="group_memberships"
+    )
+    group = models.ForeignKey(
+        "api.Groups",
+        on_delete=models.CASCADE,  # If the group is deleted, delete all memberships
+        related_name="group_members"
+    )
+    contact_name = models.CharField(max_length=255, unique=True, blank=True, null=True)  # Custom name in this group
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["user", "group"],
+                name="unique_user_in_group",
+            )
+        ]
+
+
+    def __str__(self):
+        if self.user:
+            return f"{self.nickname or self.user.username} in {self.group.name}"
+        return f"Deleted Account in {self.group.name}"  # If the user is deleted
 
 
 class Profile(Base):

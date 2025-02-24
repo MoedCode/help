@@ -52,6 +52,7 @@ class CreateGroup(APIView):
         username = request.data.get("username")
         password = request.data.get("password")
         group_name = request.data.get("group_name")
+        contact_name = request.data.get("contact_name")
         group_description = request.data.get("group_description")
 
         # Authenticate user
@@ -70,6 +71,8 @@ class CreateGroup(APIView):
             description=group_description,
             admin_user=user  # Assuming the Group model has an 'admin' field
         )
+        group_contact =GroupContact.objects.create(user=user, group=group, contact_name = contact_name or user.username)
+        group_contact.save()
         group.members.add(user)  # Add user as a member
         return Response({"message": "Group created successfully", "group_id": group.id}, status=S201)
 
@@ -81,6 +84,7 @@ class AddUserToGroup(APIView):
         group_identifier = request.data.get("group_name") or request.data.get("group_id")
         admin_username = request.data.get("admin_username")
         add_username = request.data.get("add_username")
+        contact_name = request.data.get("contact_name")
 
         # Validate input
         if not all([group_identifier, admin_username, add_username]):
@@ -112,6 +116,9 @@ class AddUserToGroup(APIView):
 
         # Add user to group
         group.members.add(add_user)
+        group_contact =GroupContact.objects.create(user=add_user, group=group, contact_name = contact_name or user.username)
+        group_contact.save()
+
         return Response({"message": f"{add_username} added to {group.name} successfully"}, status=S200)
 class RemoveUserFromGroup(APIView):
     permission_classes = [IsAuthenticated]
