@@ -22,8 +22,10 @@ urlpatterns = [
     path("group_members/", views.GroupMembersData.as_view(), name="group_members"),
     path("user_groups/", views.GetUserGroups.as_view(), name="user_groups"),
     path("create_group/", views.CreateGroup.as_view(), name="create_group"),
+    path("update_group/", views.UpdateGroup.as_view(), name="update_group"),
     path("add_user_to_group/", views.AddUserToGroup.as_view(), name="add_user_to_group"),
     path("remove_user_from_group/", views.RemoveUserFromGroup.as_view(), name="remove_user_from_group"),
+    path("get_group_contacts/", views.GetUpdateGroupContacts.as_view(), name="get_group_contacts"),
 
                         # Location URL's
     path("set_location/", views.SetLocations.as_view(), name="set_location"),

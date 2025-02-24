@@ -1,29 +1,7 @@
 {
-    "method": "GET",
-    "path": "/api/echo_request/",
-    "headers": {
-        "Content-Length": "",
-        "Content-Type": "text/plain",
-        "Host": "127.0.0.1:8000",
-        "Connection": "keep-alive",
-        "Cache-Control": "max-age=0",
-        "Sec-Ch-Ua": "\"Not(A:Brand\";v=\"99\", \"Microsoft Edge\";v=\"133\", \"Chromium\";v=\"133\"",
-        "Sec-Ch-Ua-Mobile": "?0",
-        "Sec-Ch-Ua-Platform": "\"Windows\"",
-        "Dnt": "1",
-        "Upgrade-Insecure-Requests": "1",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.0.0",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-        "Sec-Fetch-Site": "none",
-        "Sec-Fetch-Mode": "navigate",
-        "Sec-Fetch-User": "?1",
-        "Sec-Fetch-Dest": "document",
-        "Accept-Encoding": "gzip, deflate, br, zstd",
-        "Accept-Language": "en-US,en;q=0.9,cy;q=0.8",
-        "Cookie": "token=c1ff6835a0325fe19743e1ddf89849297ac816b42c953503b72d19d780731155; sessionid=wpdv03mas1yibm3nmqhgmeex6vx6ch28; csrftoken=XH2EPPG528x9eMp7ruhk3QBdfYHYJJG2K32QrWUwnjXaJUtvm5uS6vVjQqAymfa3"
-    },
-    "query_params": {},
-    "body": {},
-    "user": "Anonymous",
-    "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.0.0"
+    "username": "userX",
+    "email": "userx@gmail.com",
+    "first_name": "user",
+    "last_name": "x",
+    "id": "288a86c3-5368-4f34-8df0-b9f6201d1cd2"
 }
