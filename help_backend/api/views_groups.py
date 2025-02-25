@@ -85,14 +85,14 @@ class UpdateGroup(APIView):
 
     permission_classes = [IsAuthenticated]  # Only authenticated users can update
 
-    def  post(self, request):
+    def post(self, request):
         data = request.data
         group_id = data.get("group_id")
         group_name = data.get("group_name")
         update_data = data.get("update_data", {})
 
         if not group_id and not group_name:
-            return Response({"error": "Either group_id or group_name is required."}, status=S.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Either 'group_id' or 'group_name' is required."}, status=S.HTTP_400_BAD_REQUEST)
 
         # Retrieve group using group_id or group_name
         if group_id:
@@ -104,18 +104,42 @@ class UpdateGroup(APIView):
         if request.user != group.admin_user:
             return Response({"error": "You are not authorized to update this group."}, status=S.HTTP_403_FORBIDDEN)
 
-        # Update group fields
+        # Validate update_data fields
+        allowed_fields = {"name", "description"}
+        invalid_fields = set(update_data.keys()) - allowed_fields
+        if invalid_fields:
+            return Response({"error": f"Invalid fields: {', '.join(invalid_fields)}. Allowed fields: {', '.join(allowed_fields)}."}, status=S.HTTP_400_BAD_REQUEST)
+
+        # Check for uniqueness if updating 'name'
+        new_name = update_data.get("name")
+        if new_name and new_name != group.name:
+            if Groups.objects.filter(name=new_name).exclude(id=group.id).exists():
+                return Response({"error": f"The group name '{new_name}' already exists."}, status=S.HTTP_400_BAD_REQUEST)
+
+        # Track updates
         updated = False
+        unchanged_fields = []
+
         for field, value in update_data.items():
-            if hasattr(group, field) and getattr(group, field) != value:
-                setattr(group, field, value)
-                updated = True
+            if hasattr(group, field):
+                if getattr(group, field) != value:
+                    setattr(group, field, value)
+                    updated = True
+                else:
+                    unchanged_fields.append(field)
 
         if updated:
             group.save()
             return Response({"message": "Group updated successfully."}, status=S.HTTP_200_OK)
-        else:
-            return Response({"message": "No changes detected."}, status=S.HTTP_304_NOT_MODIFIED)
+
+        # Provide clear reasons for no update
+        if not update_data:
+            return Response({"error": "No update data provided."}, status=S.HTTP_400_BAD_REQUEST)
+
+        if unchanged_fields:
+            return Response({"error": f"No changes detected. Fields already have the same values: {', '.join(unchanged_fields)}."}, status=S.HTTP_400_BAD_REQUEST)
+
+        return Response({"error": "No valid updates were made."}, status=S.HTTP_400_BAD_REQUEST)
 
 class AddUserToGroup(APIView):
     permission_classes = [IsAuthenticated]

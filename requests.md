@@ -176,7 +176,7 @@ Vary: Accept
 {
     "group_name": "Tech Enthusiasts",
     "update_data": {
-        "name": "New Group Name",
+        "name": "Tech Enthusiasts",
         "description": "Updated description of the group."
     }
 }
