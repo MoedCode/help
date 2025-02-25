@@ -55,8 +55,4 @@ class SendSMS:
 # print(sms_sender.send_sms("+9876543210", "Hello, this is a test SMS!"))
 
 # Example Usage:
-if __name__ == "__main__":
-    credentials = {"email": "coolkatsumi@gmail.com", "password": "katsusun_PWD"}
-    send_emails = SendEmails(credentials)
-    response = send_emails.send_email("sirmohamedh@gmail.com")
-    print(response)
+
