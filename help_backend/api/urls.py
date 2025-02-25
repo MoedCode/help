@@ -37,6 +37,9 @@ urlpatterns = [
     path("delete_location/", views.SetLocations.as_view(), name="delete_location"),
     path("delete_all_locations/", views.DeleteAllLocations.as_view(), name="delete_all_locations"),
     path("subscription/", views.SubscriptionPackageView.as_view(), name="subscription"),
+                        # HELP request
+    path("help/<str:msg>", views.SendHelpToGroupMembers.as_view(), name="help"),
+    path("help/", views.SendHelpToGroupMembers.as_view(), name="help2"),
                         # echo request
     path("echo_request/", views.EchoRequestView.as_view(), name="echo_request"),
 ]
