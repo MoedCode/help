@@ -40,6 +40,8 @@ urlpatterns = [
                         # HELP request
     path("help/<str:msg>", views.SendHelpToGroupMembers.as_view(), name="help"),
     path("help/", views.SendHelpToGroupMembers.as_view(), name="help2"),
+    path("send/", views.SendEmailToTest.as_view(), name="send"),
+    path('send-sms/', views.SendSMSView.as_view(), name='send-sms'),
                         # echo request
     path("echo_request/", views.EchoRequestView.as_view(), name="echo_request"),
 ]

@@ -349,7 +349,11 @@ Content-Type: application/json
     "latitude": 40.7128,
     "longitude": -74.0060
 }
-
+{
+"dist_mail":"sirmohamedh@gmail.com",
+"dist_mail_body":"email body 4 test ",
+"dist_mail_sub":"email subject 4 test ",
+}
 
 
 ```

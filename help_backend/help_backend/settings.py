@@ -150,3 +150,17 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 MEDIA_URL = "/media/"
 
 
+# Looking to send emails in production? Check out our Email API/SMTP product!
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'sandbox.smtp.mailtrap.io'
+EMAIL_PORT = 2525  # Ensure it's an integer
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False
+EMAIL_HOST_USER = '561eb6e10647a7'
+EMAIL_HOST_PASSWORD = 'f5907d2583cf5b'
+DEFAULT_FROM_EMAIL = 'coolkatsumi@gmail.com'
+
+# settings.py
+TWILIO_ACCOUNT_SID = 'AC5ccca8450c48007535550cff2f45ad83'
+TWILIO_AUTH_TOKEN = '9BTVQ32PR3VU399JFZZGBKPL'
+TWILIO_PHONE_NUMBER = '01100783735'

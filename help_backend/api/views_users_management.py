@@ -6,7 +6,7 @@ class Hi(APIView):
 
     def get(self, request):
         return Response(
-            {"mmessage":"its kaky"} , status=S200
+            {"message":"its kaky"} , status=S200
         )
 class getCSRFCookie(APIView):
     permission_classes = []
@@ -22,7 +22,18 @@ class Register(APIView):
 
         # Extract password before passing to model
         password = clean_data.pop("password", None)
+        username = clean_data.get("username")
+        email = clean_data.get("email")
+        mobile_number = clean_data.get("mobile_number")
 
+        # Check if the username or email already exists
+        if Users.objects.filter(username=username).exists():
+            return Response({"error": "Username already exists"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if Users.objects.filter(email=email).exists():
+            return Response({"error": "Email already exists"}, status=status.HTTP_400_BAD_REQUEST)
+        if Users.objects.filter(mobile_number=mobile_number).exists():
+            return Response({"error": "mobile_number already exists"}, status=status.HTTP_400_BAD_REQUEST)
         # Create user instance (without password)
         user = Users(**clean_data)
 

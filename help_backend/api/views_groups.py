@@ -67,7 +67,8 @@ class CreateGroup(APIView):
         # Check if user is logged in
         # if not request.user.is_authenticated:
         #     return Response({"error": "User must be logged in"}, status=S403)
-
+        if Groups.objects.filter(name=group_name).exclude(id=group.id).exists():
+            return Response({"error": f"The group name '{group_name}' already exists."}, status=S.HTTP_400_BAD_REQUEST)
         # Create new group
         group = Groups.objects.create(
             name=group_name,
