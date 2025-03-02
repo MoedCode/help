@@ -36,12 +36,10 @@ class SendEmailToTest(APIView):
         return Response({"message": "Send a POST request to send an email"}, status=200)
     def post(self, request):
         try:
-            print("\na7a7a7a -1")
             # Extract email details from request
             dist_mail = request.data.get("dist_mail", "").strip()
             dist_mail_body = request.data.get("dist_mail_body", "").strip()
             dist_mail_sub = request.data.get("dist_mail_sub", "").strip()
-            print("\na7a7a7a -2")
 
             if not dist_mail or not dist_mail_body or not dist_mail_sub:
                 return Response({"error": "All fields are required (dist_mail, dist_mail_body, dist_mail_sub)"}, status=400)
@@ -64,15 +62,6 @@ class SendEmailToTest(APIView):
         except Exception as e:
             logger.error(f"Email sending failed: {str(e)}")
             return Response({"error": str(e)}, status=500)
-dataDict ={
-"dist_mail":"sirmohamedh@gmail.com",
-"dist_mail_body":"email body 4 test ",
-"dist_mail_sub":"email subject 4 test "
-}
-req = {"data":dataDict}
-s= SendEmailToTest()
-m = s.post(req)
-print(f"\n\n\n{m}\n\n\n")
 
 # class SendSMS:
 #     def __init__(self, account_sid, auth_token, twilio_number):

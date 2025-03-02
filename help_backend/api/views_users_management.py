@@ -183,7 +183,12 @@ class UserUpdate(APIView):
         # Extract username, password, and update_data from request body
         username = request.data.get("username")
         password = request.data.get("password")
+
+        # Data To Update
         update_data = request.data.get("update_data", {})
+        N_username = update_data.get("username", "")
+        N_email = update_data.get("email", "")
+        N_mobile_number = update_data.get("mobile_number", "")
 
         if not username or not password:
             return Response({"error": "Username and password are required."}, status=S400)
@@ -200,7 +205,13 @@ class UserUpdate(APIView):
         # Ensure the authenticated user matches the logged-in user
         if request.user != user:
             return Response({"error": "Unauthorized access."}, status=S403)
+        if Users.objects.filter(username=N_username).exists():
+            return Response({"error": f"Username{N_username} already exists"}, status=status.HTTP_400_BAD_REQUEST)
 
+        if Users.objects.filter(email=N_email).exists():
+            return Response({"error": f"Email {N_email}already exists"}, status=status.HTTP_400_BAD_REQUEST)
+        if Users.objects.filter(mobile_number=N_mobile_number).exists():
+            return Response({"error": f"mobile_number{N_mobile_number} already exists"}, status=status.HTTP_400_BAD_REQUEST)
         try:
             # Validate the update data
             cleaned_data = validate_user_data(update_data)
