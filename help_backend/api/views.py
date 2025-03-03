@@ -166,3 +166,4 @@ class EchoRequestView(APIView):
     def put(self, request): return self.handle_request(request)
     def patch(self, request): return self.handle_request(request)
     def delete(self, request): return self.handle_request(request)
+
