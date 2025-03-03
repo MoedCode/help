@@ -3,3 +3,4 @@ djangorestframework==3.14.0
 twilio==8.0.0
 pycountry==22.3.5
 geopy==2.3.0
+mysqlclient==2.2.0  # MySQL Database Connector
