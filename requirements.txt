@@ -1,0 +1,5 @@
+Django==4.2
+djangorestframework==3.14.0
+twilio==8.0.0
+pycountry==22.3.5
+geopy==2.3.0
