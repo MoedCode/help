@@ -4,3 +4,6 @@ twilio==8.0.0
 pycountry==22.3.5
 geopy==2.3.0
 mysqlclient==2.2.0  # MySQL Database Connector
+django-cors-headers==4.3.1  # CORS Middleware
+Pillow==10.2.0  # ImageField Support
+six==1.14.0
