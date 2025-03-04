@@ -92,10 +92,10 @@ http://127.0.0.1:8000/api/csrf
     "group_description": "A group for people interested in technology."
 }
 
-
-```
-
+http://c95de2abd422.8fd67979.alx-cod.online/
+http://wecareroot.ddns.net:5595
 # add user to the group
+
 ```json
 {
     "group_name": "Tech Enthusiasts",
