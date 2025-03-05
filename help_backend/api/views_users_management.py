@@ -49,12 +49,14 @@ class Register(APIView):
 
         # Serialize the user object using UsersSerializer
         serializer = UsersSerializer(user, context={"request": request})
+        verification = VerificationCode.objects.create(user=user)
 
         # Write serialized data to test.json for debugging
-        with open("test.json", 'w') as jf:
-            json.dump(serializer.data, jf, indent=4)
-
-        return Response(serializer.data, status=S200)
+        return Response({
+            "user": serializer.data,
+            "verification_code": verification.code,  # Return Verification Code in Response
+            "message": "User registered successfully. Please verify your code."
+        }, status=200)
 
 class Login(APIView):
     permission_classes = (permissions.AllowAny,)
