@@ -6,7 +6,7 @@ class Hi(APIView):
 
     def get(self, request):
         return Response(
-            {"message":"its kaky"} , status=S200
+            {"message":"Help Application Api Routs"} , status=S200
         )
 class getCSRFCookie(APIView):
     permission_classes = []
