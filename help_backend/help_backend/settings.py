@@ -151,7 +151,7 @@ MEDIA_URL = "/media/"
 
 ALLOWED_HOSTS = [
     'wecareroot.ddns.net', '127.0.0.1', 'localhost','197.48.253.79'
-    'wecareroot.ddns.net:5595', '197.48.253.79:5595'
+    # 'wecareroot.ddns.net:5595', '197.48.253.79:5595'
 ]
 
 # Looking to send emails in production? Check out our Email API/SMTP product!
