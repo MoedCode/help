@@ -274,6 +274,31 @@ class UserConnections(Base):
     def __str__(self):
         return f"{self.user.username}'s Contact: {self.contact_name} ({self.phone_number})"
 
+class VerificationCode(Base):
+    """Model to store verification codes with expiration."""
+    user = models.ForeignKey(
+        "api.Users",  # String reference to avoid circular import
+        on_delete=models.CASCADE,
+        related_name="verification_codes"
+    )
+    code = models.CharField(max_length=6)  # Six digits code
+    is_used = models.BooleanField(default=False)
+    expire_date = models.DateTimeField()
+
+    def save(self, *args, **kwargs):
+        """Generate code automatically if not provided and set expiration date."""
+        if not self.code:
+            self.code = str(uuid.uuid4().int)[:6]  # Random 6 digit code
+        if not self.expire_date:
+            self.expire_date = timezone.now() + timezone.timedelta(minutes=5)  # Set expiration after 5 mins
+        super().save(*args, **kwargs)
+
+    def is_valid(self):
+        """Check if the code is valid and not expired."""
+        return not self.is_used and self.expire_date > timezone.now()
+
+    def __str__(self):
+        return f"Verification Code {self.code} for {self.user.username}"
 
 Classes = {
     "Users":Users,
