@@ -188,3 +188,73 @@ Visit this link:
 ---
 
 If you still face any issues, I'll generate an automatic configuration file + deployment bash script 🚀💪.
+
+
+
+
+
+
+
+
+
+# 🎯 How to Redirect Port 5595 to Port 80 using **iptables** 🔥
+If you want to **redirect incoming traffic** from port **5595** to port **80** on your server, follow these steps:
+
+---
+
+### ✅ Command to Redirect Port 5595 to Port 80
+Run this command:
+```bash
+sudo iptables -t nat -A PREROUTING -p tcp --dport 5595 -j REDIRECT --to-port 80
+```
+### Explanation:
+- `iptables`: Command to manage firewall rules.
+- `-t nat`: Target NAT table (Network Address Translation).
+- `-A PREROUTING`: Add rule to **PREROUTING** chain (before request reaches app).
+- `-p tcp`: Protocol TCP.
+- `--dport 5595`: If the request comes to port **5595**.
+- `-j REDIRECT`: Action to **redirect** request.
+- `--to-port 80`: Redirect traffic to port **80**.
+
+---
+
+### ❌ How to Cancel/Delete That Rule
+To **delete the redirect rule**:
+
+```bash
+sudo iptables -t nat -D PREROUTING -p tcp --dport 5595 -j REDIRECT --to-port 80
+```
+---
+
+### 🔥 Verify If Rule Exists
+Before deleting, you can **list all rules** by running:
+```bash
+sudo iptables -t nat -L --line-numbers
+```
+---
+
+### 💪 If You Want to Delete All NAT Rules
+Run:
+```bash
+sudo iptables -t nat -F
+```
+---
+
+### 🔄 Persistent Rules (Auto Start with Server)
+If you want the rules to **stay after reboot**:
+1. Install `iptables-persistent`
+```bash
+sudo apt install iptables-persistent
+```
+2. Save the rules:
+```bash
+sudo netfilter-persistent save
+```
+---
+
+### 📝 Note:
+- If you **don't save** the rules, they will be automatically removed after reboot.
+
+---
+
+Would you like me to **generate SSL on port 5595 without stopping Nginx** 🔒?
