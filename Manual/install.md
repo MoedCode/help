@@ -116,3 +116,39 @@ echo "✅ Python and pip updated successfully!"
 python3 --version
 pip3 --version
 ````
+# sudo vim /etc/nginx/sites-available/wecareroot 0
+```nginx
+server {
+    listen 5595;
+    server_name wecareroot.ddns.net; # Your DDNS Hostname
+
+    location / {
+        proxy_pass http://127.0.0.1:8000/; # Django Backend
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+
+
+```
+server {
+    listen 5595;
+    server_name wecareroot.ddns.net;
+
+    location /.well-known/acme-challenge/ {
+        allow all;
+        root /var/www/html;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:8000/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
