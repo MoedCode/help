@@ -57,6 +57,8 @@ class Register(APIView):
             "verification_code": verification.code,  # Return Verification Code in Response
             "message": "User registered successfully. Please verify your code."
         }, status=200)
+
+
 class ActivateAccount(APIView):
     def post(self, request):
         username = request.data.get("username")
@@ -87,7 +89,7 @@ class ActivateAccount(APIView):
         verification.is_used = True
         verification.save()
 
-        return Re
+        return Response({"message": "Account activated successfully"}, status=status.HTTP_200_OK)
 class Login(APIView):
     permission_classes = (permissions.AllowAny,)
     authentication_classes = (SessionAuthentication,)
