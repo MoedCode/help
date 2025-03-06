@@ -57,7 +57,37 @@ class Register(APIView):
             "verification_code": verification.code,  # Return Verification Code in Response
             "message": "User registered successfully. Please verify your code."
         }, status=200)
+class ActivateAccount(APIView):
+    def post(self, request):
+        username = request.data.get("username")
+        code = request.data.get("code")
 
+        if not username or not code:
+            return Response({"error": "Username and Verification Code are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user = Users.objects.get(username=username)
+            verification = VerificationCode.objects.get(user=user, code=code)
+        except (Users.DoesNotExist, VerificationCode.DoesNotExist):
+            return Response({"error": "Invalid Username or Verification Code"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if the code is already used
+        if verification.is_used:
+            return Response({"error": "This verification code is already used"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if the code is expired
+        if timezone.now() > verification.expiry_date:
+            return Response({"error": "Verification code has expired"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Activate User
+        user.is_active = True
+        user.save()
+
+        # Mark the Code as Used
+        verification.is_used = True
+        verification.save()
+
+        return Re
 class Login(APIView):
     permission_classes = (permissions.AllowAny,)
     authentication_classes = (SessionAuthentication,)
@@ -71,7 +101,8 @@ class Login(APIView):
 
         # Authenticate user
         user = authenticate(username=username, password=password)
-
+        if not user.is_active:
+            return Response({"error":"please activate your account"}, S401)
         if user:
             login(request, user)  # Start session
 
