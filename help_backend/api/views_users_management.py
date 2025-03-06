@@ -78,7 +78,7 @@ class GetVerificationCode(APIView):
             )
 
         # Clear expired codes before generating new one
-        VerificationCode.clear_expired_codes(user=user)
+        VerificationCode.clear_codes(user=user)
 
         # Generate new verification code
         verification_code = VerificationCode.objects.create(user=user)
