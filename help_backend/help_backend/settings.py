@@ -154,6 +154,10 @@ MEDIA_URL = "/media/"
 
 # ]
 ALLOWED_HOSTS = ['*']
+CSRF_TRUSTED_ORIGINS = [
+    "http://wecareroot.ddns.net:5595",
+    "http://197.48.253.79:5595"
+]
 
 # Looking to send emails in production? Check out our Email API/SMTP product!
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

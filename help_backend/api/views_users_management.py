@@ -1,6 +1,6 @@
 from api.views_main import *
-
-
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 # Create your views here.
 class Hi(APIView):
 
@@ -8,13 +8,12 @@ class Hi(APIView):
         return Response(
             {"message":"Help Application Api Routs"} , status=S200
         )
-class getCSRFCookie(APIView):
-    permission_classes = []
-    authentication_classes = []
 
-    @ensure_csrf
+@method_decorator(csrf_exempt, name='dispatch')
+class getCSRFCookie(APIView):
     def get(self, request):
-        return Response({"csrfToken": get_token(request)})
+        csrf_token = get_token(request)
+        return JsonResponse({"csrf_token": csrf_token})
 
 class Register(APIView):
     def post(self, request):
