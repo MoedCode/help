@@ -103,7 +103,9 @@ class Login(APIView):
 
         # Authenticate user
         user = authenticate(username=username, password=password)
-        if not user.is_active:
+
+        user_q = Users.objects.filter(username=username).first()
+        if not user_q.is_active:
             return Response({"error":"please activate your account"}, S401)
         if user:
             login(request, user)  # Start session
