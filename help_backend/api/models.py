@@ -290,7 +290,7 @@ class VerificationCode(Base):
         if not self.code:
             self.code = str(uuid.uuid4().int)[:6]  # Random 6 digit code
         if not self.expire_date:
-            self.expire_date = timezone.now() + timezone.timedelta(minutes=5)  # Set expiration after 5 mins
+            self.expire_date = timezone.now() + timezone.timedelta(minutes=30)  # Set expiration after 5 mins
         super().save(*args, **kwargs)
 
     def is_valid(self):
@@ -299,7 +299,37 @@ class VerificationCode(Base):
 
     def __str__(self):
         return f"Verification Code {self.code} for {self.user.username}"
+    @classmethod
+    def clear_codes(cls, user=None, code=None, clear_all=False):
+        """
+        Clear expired codes:
+        - By user
+        - By specific code
+        - Clear all expired codes
+        """
+        if not user and not clear_all and not code:
+            raise ValueError("You must provide user, code, or set clear_all=True")
 
+        if code:
+            try:
+                specific_code = cls.objects.get(code=code)
+                if specific_code.expire_date < timezone.now() and not specific_code.is_used:
+                    specific_code.delete()
+                    return f"Verification code {code} deleted."
+                else:
+                    return "Code is not expired or already used."
+            except cls.DoesNotExist:
+                return "Verification code not found."
+
+        if user:
+            expired_codes = cls.objects.filter(user=user, expire_date__lt=timezone.now(), is_used=False)
+        elif clear_all:
+            expired_codes = cls.objects.filter(expire_date__lt=timezone.now(), is_used=False)
+        else:
+            expired_codes = cls.objects.none()
+
+        count = expired_codes.delete()
+        return f"{count[0]} expired codes deleted."
 Classes = {
     "Users":Users,
     "Profile":Profile,

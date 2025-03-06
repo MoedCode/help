@@ -58,6 +58,39 @@ class Register(APIView):
             "is_active":user.is_active
         }, status=200)
 
+class GetVerificationCode(APIView):
+    def post(self, request):
+        username = request.data.get("username")
+        mobile_number = request.data.get("mobile_number")
+
+        if not username or not mobile_number:
+            return Response(
+                {"error": "Username and Mobile Number are required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            user = Users.objects.get(username=username, mobile_number=mobile_number)
+        except Users.DoesNotExist:
+            return Response(
+                {"error": "Invalid Username or Mobile Number"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Clear expired codes before generating new one
+        VerificationCode.clear_expired_codes(user=user)
+
+        # Generate new verification code
+        verification_code = VerificationCode.objects.create(user=user)
+
+        return Response(
+            {
+                "message": "Verification code generated successfully",
+                "code": verification_code.code,  # ✅ Show the code (Only for testing)
+                "expire_at": verification_code.expire_date.strftime("%Y-%m-%d %H:%M:%S"),
+            },
+            status=status.HTTP_200_OK
+        )
 
 class ActivateAccount(APIView):
     def post(self, request):

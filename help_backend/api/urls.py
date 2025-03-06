@@ -8,11 +8,13 @@ urlpatterns = [
     path("register/", views.Register.as_view(), name="resgister"),
     path("delete_user/", views.DeleteUser.as_view(), name="delete_user"),
     path("login/", views.Login.as_view(), name="login"),
-    path("activate/", views.ActivateAccount.as_view(), name="activate"),
     path("logout/", views.Logout.as_view(), name="logout"),
     path("login/", views.Login.as_view(), name="login"),
     path("user_data/", views.GetUserData.as_view(), name="user_data"),
     path("user_update/", views.UserUpdate.as_view(), name="user_update"),
+    path("activate/", views.ActivateAccount.as_view(), name="activate"),
+    path("get_code/", views.GetVerificationCode.as_view(), name="get_code"),
+
 
                         #Profile URL's
     path("profile_view/", views.ProfileView.as_view(), name="profile_view"),
