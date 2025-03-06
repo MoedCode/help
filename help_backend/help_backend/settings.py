@@ -149,10 +149,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # print(f"\n\n MEDIA_ROOT{ MEDIA_ROOT}")
 MEDIA_URL = "/media/"
 
-ALLOWED_HOSTS = [
-    'wecareroot.ddns.net', '127.0.0.1', 'localhost','197.48.253.79'
-    # 'wecareroot.ddns.net:5595', '197.48.253.79:5595'
-]
+# ALLOWED_HOSTS = [
+#     'wecareroot.ddns.net', '127.0.0.1', 'localhost','197.48.253.79'
+
+# ]
+ALLOWED_HOSTS = ['*']
 
 # Looking to send emails in production? Check out our Email API/SMTP product!
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
