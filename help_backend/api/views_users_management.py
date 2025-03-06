@@ -40,21 +40,22 @@ class Register(APIView):
         if password:
             user.set_password(password)  # 🔑 Hashes the password
 
-
+        user.is_active = False;
         user.save()  # Now the password is securely stored
 
         # 🔹 Create the Profile instance for the user
         Profile.objects.create(user=user)
 
         # Serialize the user object using UsersSerializer
-        serializer = UsersSerializer(user, context={"request": request})
+        serializer = UsersSerializer(user, context={"request": request}).data
         verification = VerificationCode.objects.create(user=user)
 
         # Write serialized data to test.json for debugging
         return Response({
-            "user": serializer.data,
+            "user": serializer,
             "verification_code": verification.code,  # Return Verification Code in Response
-            "message": "User registered successfully. Please verify your code."
+            "message": "User registered successfully. Please verify your code.",
+            "is_active":user.is_active
         }, status=200)
 
 
