@@ -73,23 +73,21 @@ class ActivateAccount(APIView):
         except (Users.DoesNotExist, VerificationCode.DoesNotExist):
             return Response({"error": "Invalid Username or Verification Code"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check if the code is already used
         if verification.is_used:
             return Response({"error": "This verification code is already used"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check if the code is expired
-        if timezone.now() > verification.expiry_date:
+        # Here 🔥
+        if timezone.now() > verification.expire_date:
             return Response({"error": "Verification code has expired"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Activate User
         user.is_active = True
         user.save()
 
-        # Mark the Code as Used
         verification.is_used = True
         verification.save()
 
         return Response({"message": "Account activated successfully"}, status=status.HTTP_200_OK)
+
 class Login(APIView):
     permission_classes = (permissions.AllowAny,)
     authentication_classes = (SessionAuthentication,)
