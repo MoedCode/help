@@ -204,8 +204,8 @@ class DeleteUser(APIView):
             return Response({"error": "Invalid credentials"}, status=S401)
 
         # Ensure the user is deleting their own account
-        if request.user != user:
-            return Response({"error": "login  required"}, status=S403)
+        # if request.user != user:
+        #     return Response({"error": "login  required"}, status=S403)
 
         # Log out the user if they are authenticated
         logout(request)
@@ -244,6 +244,7 @@ class GetUserData(APIView):
             "user": user_data,
             "profile": profile_data
         })
+
 class UserUpdate(APIView):
     permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access
 
