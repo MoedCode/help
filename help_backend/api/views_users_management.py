@@ -199,6 +199,9 @@ class DeleteUser(APIView):
             return Response({"error": "Username and password are required"}, status=S400)
 
         # Authenticate user
+        user_q = Users.objects.filter(username=username).first()
+        if not user_q:
+            return Response({"error": "user is not exist"}, status=S401)
         user = authenticate(username=username, password=password)
         if not user:
             return Response({"error": "Invalid credentials"}, status=S401)
