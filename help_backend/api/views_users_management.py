@@ -346,7 +346,8 @@ class ProfileUpdate(APIView):
             setattr(profile, field, value)
         profile.save()
 
-        serializer = ProfileSerializer(profile)
+        serializer = ProfileSerializer(profile).data
+
         return Response(serializer.data, status=S200)
 
 class profileUpdate_(APIView):
