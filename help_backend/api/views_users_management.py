@@ -177,6 +177,9 @@ class ProfileView(APIView):
         try:
             username = request.data.get("username")
             user = Users.objects.filter(username=username).first()
+
+            if not user.is_active:
+                return Response({"error":"please activate your account"}, S401)
             profile = Profile.objects.filter(user=user).first()
             serialized_profile = ProfileSerializer(profile, context={"request": request})
             return Response(
@@ -324,7 +327,9 @@ class ProfileUpdate(APIView):
         is_valid, result = validate_profile_update(request.data)
         if not is_valid:
             return Response(result, status=S400)
-
+        user_q = Users.objects.filter(username=request.user.username).first()
+        if not user_q.is_active:
+            return Response({"error":"please activate your account"}, S401)
         profile = Profile.objects.filter(user=request.user).first()
         if not profile:
             try:

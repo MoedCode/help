@@ -75,6 +75,45 @@ http://127.0.0.1:8000/api/register/
 
 ```
 ---
+### **3. update  Users**
+```json
+{
+    "username": "max_john_doee",
+    "password": "Joh_M$25xo",
+    "update_data": {
+        "email": "max.new@example.com",
+        "first_name": "MaxVerywell",
+        "last_name": "Doe",
+        "mobile_number": "2134567899",
+        "date_of_birth": "2000-05-10",
+        "street": "456 Elm St",
+        "city": "Los Angeles",
+        "country": "USA"
+
+    }
+}
+
+```
+
+
+### **3. activate  Users**
+**URL**
+**request**
+```json
+//user
+{
+    "username": "max_john_doee",
+    "code": "698693"
+}
+
+```
+response
+```json
+{
+    "message": "Account activated successfully"
+}
+
+```
 
 ### **3. Login Users**
 #### **Login User 1**
