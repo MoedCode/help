@@ -347,7 +347,7 @@ class ProfileUpdate(APIView):
         profile.save()
 
         serializer = ProfileSerializer(profile).data
-
+        del serializer["verified"]
         return Response(serializer.data, status=S200)
 
 class profileUpdate_(APIView):
