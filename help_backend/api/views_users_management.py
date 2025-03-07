@@ -348,7 +348,7 @@ class ProfileUpdate(APIView):
 
         serializer = ProfileSerializer(profile).data
         del serializer["verified"]
-        return Response(serializer.data, status=S200)
+        return Response(serializer, status=S200)
 
 class profileUpdate_(APIView):
     """ Pofile Update Endpoint Class"""
