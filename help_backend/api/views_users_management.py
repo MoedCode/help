@@ -307,7 +307,11 @@ class UserUpdate(APIView):
             return Response({"message": "Password updated successfully. Please log in again."}, status=S200)
         user.is_active = False
         user.save()
-
+        if N_mobile_number and user.mobile_number != N_mobile_number:
+            user.is_active = False
+            user.save()
+            VerificationCode.objects.create(user=user)
+            return Response({"message": "Mobile number updated. Verification code sent. Please activate your account."}, status=S200)
         # Serialize and return updated user data
         serializer = UsersSerializer(user)
         return Response({"message": "User data updated successfully.", "user": serializer.data}, status=S200)
