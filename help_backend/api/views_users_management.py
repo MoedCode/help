@@ -328,7 +328,7 @@ class ProfileUpdate(APIView):
         if not is_valid:
             return Response(result, status=S400)
         user_q = Users.objects.filter(username=request.user.username).first()
-        if not request.user.verified:
+        if not user_q.verified:
             return Response({"error":"please activate your account"}, S401)
         profile = Profile.objects.filter(user=request.user).first()
         if not profile:
