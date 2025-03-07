@@ -204,9 +204,9 @@ class DeleteUser(APIView):
             return Response({"error": "password "}, status=S401)
         if not user_q:
             return Response({"error": "user is not exist"}, status=S401)
-        user = authenticate(username=username, password=password)
-        if not user:
-            return Response({"error": "Invalid credentials"}, status=S401)
+        # user = authenticate(username=username, password=password)
+        # if not user:
+            # return Response({"error": "Invalid credentials"}, status=S401)
 
         # Ensure the user is deleting their own account
         # if request.user != user:
@@ -216,7 +216,7 @@ class DeleteUser(APIView):
         logout(request)
 
         # Delete user account
-        user.delete()
+        user_q.delete()
 
         return Response({"message": "Account deleted successfully"}, status=S200)
 class GetUserData(APIView):
