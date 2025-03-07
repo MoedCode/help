@@ -1,6 +1,7 @@
 from api.views_main import *
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.hashers import check_password
 # Create your views here.
 class Hi(APIView):
 
@@ -197,9 +198,10 @@ class DeleteUser(APIView):
         # Validate input
         if not username or not password:
             return Response({"error": "Username and password are required"}, status=S400)
-
         # Authenticate user
         user_q = Users.objects.filter(username=username).first()
+        if not check_password(password, user_q.password):
+            return Response({"error": "password "}, status=S401)
         if not user_q:
             return Response({"error": "user is not exist"}, status=S401)
         user = authenticate(username=username, password=password)
