@@ -1,3 +1,5 @@
 .vscode/
 .git/
+api/
+setting.py
 out
