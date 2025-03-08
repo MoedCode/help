@@ -1,5 +1,5 @@
 .vscode/
 .git/
-api/
+help_backend/api/
 setting.py
 out
