@@ -1,3 +1,6 @@
 .vscode/
 .git/
+dist/
+build/
 __pycache__/
+out
