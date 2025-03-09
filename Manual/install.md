@@ -152,3 +152,65 @@ server {
     }
 }
 
+
+
+Looks like Python **3.12** is installed, but WSL is still using **3.8.10** by default. We need to **set Python 3.12 as the default version**.
+
+### **🔥 Fix Python Version 🔥**
+Run these commands **one by one**:
+
+```bash
+sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.8 1
+sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 2
+sudo update-alternatives --config python3
+```
+
+---
+
+### **📌 When You See This Menu:**
+It will show something like:
+
+```
+There are 2 choices for the alternative python3 (providing /usr/bin/python3).
+  Selection    Path                  Priority   Status
+------------------------------------------------------------
+* 0            /usr/bin/python3.8      1         auto mode
+  1            /usr/bin/python3.8      1         manual mode
+  2            /usr/bin/python3.12     2         manual mode
+
+Press <enter> to keep the current choice[*], or type selection number:
+```
+
+👉 **Type** `2` (for Python 3.12) and hit **ENTER**
+
+---
+
+### **🚀 Verify Python Version**
+Now, check if Python 3.12 is set correctly:
+
+```bash
+python3 --version
+```
+
+✅ If it shows **Python 3.12.X**, you are good to go!
+
+---
+
+### **💡 If It Still Shows Python 3.8**
+Run:
+
+```bash
+hash -r
+python3 --version
+```
+
+Still stuck? **Restart WSL**:
+
+```bash
+wsl --shutdown
+```
+Then **open WSL again** and check the Python version.
+
+---
+
+Let me know what happens! 🚀💪
