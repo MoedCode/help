@@ -1,5 +1,6 @@
 .vscode/
 .git/
+help_backend/api/
 dist/
 build/
 __pycache__/

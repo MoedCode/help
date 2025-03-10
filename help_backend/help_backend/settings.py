@@ -159,6 +159,8 @@ CSRF_TRUSTED_ORIGINS = [
     "http://197.48.253.79:5595"
 ]
 
+
+
 # Looking to send emails in production? Check out our Email API/SMTP product!
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'sandbox.smtp.mailtrap.io'
